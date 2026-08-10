@@ -200,7 +200,9 @@ def format_markdown_table(agg: dict, k_values: tuple[int, ...]) -> str:
 
 def build_markdown_report(
     results: list[dict],
-    excluded: list[dict],
+    skipped: list[dict],
+    refusal_diagnostics: list[dict],
+    gap: dict,
     overall: dict,
     by_tier: dict[str, dict],
     tier_counts: dict[str, int],
@@ -212,14 +214,13 @@ def build_markdown_report(
     lines = [
         f"# Retrieval evaluation report — {timestamp}",
         "",
-        f"Evaluated {len(results)} questions ({', '.join(f'{count} {tier}' for tier, count in tier_counts.items())}). "
-        f"{len(excluded)} refusal-tier questions excluded (no retrievable answer by design).",
-        "",
-        "## Overall",
-        "",
-        format_markdown_table(overall, k_values),
-        "",
+        f"Evaluated {len(results)} answerable questions ({', '.join(f'{count} {tier}' for tier, count in tier_counts.items())}) "
+        f"against Recall/Precision/MRR/NDCG, plus {len(refusal_diagnostics)} refusal-tier questions run through "
+        f"retrieval for score diagnostics only (no ground-truth chunk to score against).",
     ]
+    if skipped:
+        lines.append(f"{len(skipped)} question(s) skipped entirely (missing `answer_anchor`).")
+    lines += ["", "## Overall", "", format_markdown_table(overall, k_values), ""]
 
     for tier, tier_results in sorted(by_tier.items()):
         agg = aggregate(tier_results, k_values)
@@ -233,6 +234,41 @@ def build_markdown_report(
             lines.append(f"- `{r['id']}` [{r['tier']}, {r['source_doc']}]: {r['question']}")
     else:
         lines.append("None — every evaluated question's answer chunk was retrieved.")
+    lines.append("")
+
+    def fmt(v):
+        return f"{v:.3f}" if v is not None else "—"
+
+    a, ref = gap["answerable_top1"], gap["refusal_top1"]
+    lines += [
+        "## Refusal-tier diagnostics",
+        "",
+        "Refusal questions have no correct chunk, so there's nothing to score them against directly. "
+        "What matters is whether their top-hit similarity scores run lower than answerable questions' — "
+        "that gap is what a similarity-threshold refusal guardrail would be calibrated on.",
+        "",
+        "| Group | n | mean top-1 score | min | max |",
+        "|---|---|---|---|---|",
+        f"| Answerable questions | {a['n']} | {fmt(a['mean'])} | {fmt(a['min'])} | {fmt(a['max'])} |",
+        f"| Refusal questions | {ref['n']} | {fmt(ref['mean'])} | {fmt(ref['min'])} | {fmt(ref['max'])} |",
+        "",
+    ]
+    if a["mean"] is not None and ref["mean"] is not None:
+        gap_val = a["mean"] - ref["mean"]
+        verdict = (
+            "there's a usable gap — a similarity threshold could plausibly separate them."
+            if gap_val > 0.02
+            else "the gap is small — a bare similarity threshold likely won't reliably separate them; "
+            "the guardrail will need more than top-score alone."
+        )
+        lines.append(f"Mean gap: {gap_val:.3f} ({verdict})")
+        lines.append("")
+
+    lines += ["### Per-question detail", "", "| id | question | top-1 score | top-1 doc | matches named company? |", "|---|---|---|---|---|"]
+    for d in refusal_diagnostics:
+        score_str = f"{d['top1_score']:.3f}" if d["top1_score"] is not None else "—"
+        match_str = "yes" if d["top1_matches_named_doc"] else ("n/a" if d["top1_matches_named_doc"] is None else "no")
+        lines.append(f"| `{d['id']}` | {d['question']} | {score_str} | {d['top1_source_doc']} | {match_str} |")
     lines.append("")
 
     return "\n".join(lines)
@@ -251,7 +287,9 @@ def main() -> None:
     pc = Pinecone(api_key=os.environ["PINECONE_API_KEY"])
 
     print(f"Evaluating {len(questions)} questions from {args.eval_set} ...")
-    results, excluded = run_evaluation(questions, pc, k_values)
+    results, skipped = run_evaluation(questions, pc, k_values)
+    refusal_diagnostics = run_refusal_diagnostics(questions, pc, k_values)
+    gap = score_gap_summary(results, refusal_diagnostics)
 
     tier_counts = defaultdict(int)
     by_tier = defaultdict(list)
@@ -275,6 +313,17 @@ def main() -> None:
     for r in misses:
         print(f"  - {r['id']} [{r['tier']}, {r['source_doc']}]: {r['question']}")
 
+    a, ref = gap["answerable_top1"], gap["refusal_top1"]
+    print()
+    print("=== Refusal-tier diagnostics ===")
+    if a["mean"] is not None and ref["mean"] is not None:
+        print(f"Answerable top-1 score: mean={a['mean']:.3f} min={a['min']:.3f} max={a['max']:.3f} (n={a['n']})")
+        print(f"Refusal    top-1 score: mean={ref['mean']:.3f} min={ref['min']:.3f} max={ref['max']:.3f} (n={ref['n']})")
+        print(f"Gap: {a['mean'] - ref['mean']:.3f}")
+    for d in refusal_diagnostics:
+        score_str = f"{d['top1_score']:.3f}" if d["top1_score"] is not None else "n/a"
+        print(f"  - {d['id']} [{d['source_doc']}] top1={score_str} top1_doc={d['top1_source_doc']}: {d['question']}")
+
     timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H-%M-%SZ")
     args.output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -285,10 +334,14 @@ def main() -> None:
         "overall": overall,
         "by_tier": {tier: aggregate(tier_results, k_values) for tier, tier_results in by_tier.items()},
         "tier_counts": dict(tier_counts),
-        "excluded_refusal_count": len(excluded),
+        "skipped_missing_anchor_count": len(skipped),
         "results": results,
+        "refusal_diagnostics": refusal_diagnostics,
+        "score_gap_summary": gap,
     }
-    markdown = build_markdown_report(results, excluded, overall, by_tier, dict(tier_counts), k_values, timestamp)
+    markdown = build_markdown_report(
+        results, skipped, refusal_diagnostics, gap, overall, by_tier, dict(tier_counts), k_values, timestamp
+    )
 
     for stem in (timestamp, "latest"):
         (args.output_dir / f"{stem}.json").write_text(json.dumps(report_json, indent=2), encoding="utf-8")
