@@ -9,17 +9,9 @@ import os
 from dotenv import load_dotenv
 from pinecone import Pinecone
 
+from config import EMBEDDING_MODEL, FILINGS
+
 load_dotenv()
-
-EMBEDDING_MODEL = "llama-text-embed-v2"
-
-FILINGS = {
-    "castellum-10q": "Castellum 10Q.pdf",
-    "ironstone-properties-10q": "Ironstone Properties 10Q.pdf",
-    "regen-bio-pharma-10q": "Regen Bio Pharma 10Q.pdf",
-    "xerian-10q": "Xerian 10Q.pdf",
-    "alternus-10q": "Alternus 10Q.pdf",
-}
 
 
 def main() -> None:

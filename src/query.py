@@ -1,9 +1,9 @@
 """Answers a question about the SEC filings using Pinecone (retrieval) + Claude (generation).
 
-Usage:
-    python query.py "What was the change in revenue?"
-    python query.py "What was the change in revenue?" --filing castellum
-    python query.py "Compare gross profit across filings" --top-k 8
+Usage (from the project root):
+    python src/query.py "What was the change in revenue?"
+    python src/query.py "What was the change in revenue?" --filing castellum
+    python src/query.py "Compare gross profit across filings" --top-k 8
 """
 
 import argparse
@@ -13,9 +13,10 @@ import anthropic
 from dotenv import load_dotenv
 from pinecone import Pinecone
 
+from config import NAMESPACE
+
 load_dotenv()
 
-NAMESPACE = "chunks"
 MODEL = "claude-sonnet-5"
 TOP_K_PER_INDEX = 5
 

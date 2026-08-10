@@ -1,5 +1,5 @@
 """Extracts text from each 10-Q PDF, chunks it, and upserts the chunks into
-its matching Pinecone index (created by setup_pinecone.py).
+its matching Pinecone index (created by pinecone_setup.py).
 
 Embeddings are generated server-side by Pinecone (integrated inference),
 so we upsert raw text under the `chunk_text` field, not vectors.
@@ -12,20 +12,13 @@ from dotenv import load_dotenv
 from pinecone import Pinecone
 from pypdf import PdfReader
 
+from config import FILINGS, FILINGS_DIR, NAMESPACE
+
 load_dotenv()
 
-NAMESPACE = "chunks"
 MAX_CHARS = 1500
 OVERLAP = 200
 BATCH_SIZE = 90
-
-FILINGS = {
-    "castellum-10q": "Castellum 10Q.pdf",
-    "ironstone-properties-10q": "Ironstone Properties 10Q.pdf",
-    "regen-bio-pharma-10q": "Regen Bio Pharma 10Q.pdf",
-    "xerian-10q": "Xerian 10Q.pdf",
-    "alternus-10q": "Alternus 10Q.pdf",
-}
 
 
 def chunk_page(text: str, max_chars: int = MAX_CHARS, overlap: int = OVERLAP) -> list[str]:
@@ -93,7 +86,8 @@ def main() -> None:
 
     for index_name, filename in FILINGS.items():
         print(f"{filename} -> {index_name}")
-        records = extract_records(filename, source=index_name)
+        pdf_path = FILINGS_DIR / filename
+        records = extract_records(str(pdf_path), source=index_name)
         print(f"  {len(records)} chunks extracted")
 
         index = pc.Index(index_name)
