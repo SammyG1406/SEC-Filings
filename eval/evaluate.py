@@ -8,10 +8,18 @@ so filtered_lookup questions genuinely test whether the right document
 surfaces on its own, and the scores are directly comparable to whatever
 retrieval strategy (metadata filtering, reranking, etc.) you add later.
 
-Refusal-tier questions have no retrievable answer chunk by design, so
-they're excluded from these metrics — they belong to a separate
-generation/guardrail evaluation (does the system correctly decline to
-answer), which this script does not attempt.
+Refusal-tier questions have no retrievable answer chunk by design, so they're
+excluded from Recall/Precision/MRR/NDCG — there's no "correct" chunk to score
+against. But they are still run through the retriever: Pinecone always
+returns its nearest neighbors regardless of whether anything actually
+answers the question, so "the system returns nothing" isn't something
+retrieval can do on its own — that has to be a downstream guardrail (e.g.
+refuse below a similarity threshold). What this script CAN measure is
+whether refusal-tier top-hit scores are meaningfully weaker than answerable
+questions' — that gap is what such a threshold would be calibrated against.
+See "Refusal-tier diagnostics" in the report. Whether the system eventually
+*generates* a correct refusal is a separate generation/guardrail evaluation,
+which this script does not attempt.
 
 A chunk counts as "relevant" to a question if it contains the question's
 `answer_anchor` text. A few computed_comparative anchors in the eval set
@@ -78,22 +86,27 @@ def score_question(anchor: str, candidates: list[dict], k_values: tuple[int, ...
     return {"total_relevant_found": total_relevant, "first_hit_rank": first_hit_rank, "per_k": per_k}
 
 
+def safe_retrieve(pc: Pinecone, question: str, top_k: int) -> list[dict]:
+    try:
+        return retrieve(pc, question, filing=None, top_k=top_k)
+    except Exception as exc:  # keep the run going even if one query fails
+        print(f"  ! retrieval failed for {question!r}: {exc}", file=sys.stderr)
+        return []
+
+
 def run_evaluation(questions: list[dict], pc: Pinecone, k_values: tuple[int, ...]) -> tuple[list[dict], list[dict]]:
     max_k = max(k_values)
     results = []
-    excluded = []
+    skipped = []  # answerable in principle but missing an anchor to score against
 
     for q in questions:
-        if q["answer_type"] == "refusal" or not q.get("answer_anchor"):
-            excluded.append(q)
+        if q["answer_type"] == "refusal":
+            continue
+        if not q.get("answer_anchor"):
+            skipped.append(q)
             continue
 
-        try:
-            candidates = retrieve(pc, q["question"], filing=None, top_k=max_k)
-        except Exception as exc:  # keep the run going even if one query fails
-            print(f"  ! {q['id']} retrieval failed: {exc}", file=sys.stderr)
-            candidates = []
-
+        candidates = safe_retrieve(pc, q["question"], max_k)
         scored = score_question(q["answer_anchor"], candidates, k_values)
         results.append(
             {
@@ -104,11 +117,52 @@ def run_evaluation(questions: list[dict], pc: Pinecone, k_values: tuple[int, ...
                 "found": scored["total_relevant_found"] > 0,
                 "first_hit_rank": scored["first_hit_rank"],
                 "num_candidates": len(candidates),
+                "top1_score": candidates[0]["score"] if candidates else None,
                 "scores": scored["per_k"],
             }
         )
 
-    return results, excluded
+    return results, skipped
+
+
+def run_refusal_diagnostics(questions: list[dict], pc: Pinecone, k_values: tuple[int, ...]) -> list[dict]:
+    """Retrieves for refusal-tier questions and records how confident the
+    top hits look, without scoring them against any ground-truth chunk."""
+    max_k = max(k_values)
+    diagnostics = []
+
+    for q in questions:
+        if q["answer_type"] != "refusal":
+            continue
+
+        candidates = safe_retrieve(pc, q["question"], max_k)
+        scores = [c["score"] for c in candidates]
+        top3 = scores[:3]
+        diagnostics.append(
+            {
+                "id": q["id"],
+                "source_doc": q["source_doc"],
+                "question": q["question"],
+                "top1_score": scores[0] if scores else None,
+                "top3_avg_score": sum(top3) / len(top3) if top3 else None,
+                "top1_source_doc": candidates[0]["source"] if candidates else None,
+                "top1_matches_named_doc": (candidates[0]["source"] == q["source_doc"]) if candidates else None,
+            }
+        )
+
+    return diagnostics
+
+
+def score_gap_summary(results: list[dict], refusal_diagnostics: list[dict]) -> dict:
+    answerable_scores = [r["top1_score"] for r in results if r["top1_score"] is not None]
+    refusal_scores = [d["top1_score"] for d in refusal_diagnostics if d["top1_score"] is not None]
+
+    def stats(vals: list[float]) -> dict:
+        if not vals:
+            return {"n": 0, "mean": None, "min": None, "max": None}
+        return {"n": len(vals), "mean": sum(vals) / len(vals), "min": min(vals), "max": max(vals)}
+
+    return {"answerable_top1": stats(answerable_scores), "refusal_top1": stats(refusal_scores)}
 
 
 def aggregate(results: list[dict], k_values: tuple[int, ...]) -> dict:

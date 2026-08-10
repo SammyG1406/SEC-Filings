@@ -1,0 +1,1524 @@
+{
+  "timestamp": "2026-08-10T13-09-07Z",
+  "eval_set": "C:\\SEC Filings\\SEC-Filings\\eval\\qa_eval_set.json",
+  "k_values": [
+    1,
+    3,
+    5,
+    10
+  ],
+  "overall": {
+    "1": {
+      "recall": 0.65,
+      "precision": 0.65,
+      "mrr": 0.65,
+      "ndcg": 0.65
+    },
+    "3": {
+      "recall": 0.775,
+      "precision": 0.2583333333333333,
+      "mrr": 0.7083333333333333,
+      "ndcg": 0.7255929753571457
+    },
+    "5": {
+      "recall": 0.825,
+      "precision": 0.165,
+      "mrr": 0.7208333333333333,
+      "ndcg": 0.7471268032608154
+    },
+    "10": {
+      "recall": 0.875,
+      "precision": 0.0875,
+      "mrr": 0.7291666666666667,
+      "ndcg": 0.7649371626162165
+    }
+  },
+  "by_tier": {
+    "simple_lookup": {
+      "1": {
+        "recall": 0.7333333333333333,
+        "precision": 0.7333333333333333,
+        "mrr": 0.7333333333333333,
+        "ndcg": 0.7333333333333333
+      },
+      "3": {
+        "recall": 0.8666666666666667,
+        "precision": 0.28888888888888886,
+        "mrr": 0.8,
+        "ndcg": 0.8174573004761944
+      },
+      "5": {
+        "recall": 0.8666666666666667,
+        "precision": 0.17333333333333334,
+        "mrr": 0.8,
+        "ndcg": 0.8174573004761944
+      },
+      "10": {
+        "recall": 0.8666666666666667,
+        "precision": 0.08666666666666667,
+        "mrr": 0.8,
+        "ndcg": 0.8174573004761944
+      }
+    },
+    "filtered_lookup": {
+      "1": {
+        "recall": 0.7,
+        "precision": 0.7,
+        "mrr": 0.7,
+        "ndcg": 0.7
+      },
+      "3": {
+        "recall": 0.8,
+        "precision": 0.26666666666666666,
+        "mrr": 0.75,
+        "ndcg": 0.7630929753571458
+      },
+      "5": {
+        "recall": 0.8,
+        "precision": 0.16,
+        "mrr": 0.75,
+        "ndcg": 0.7630929753571458
+      },
+      "10": {
+        "recall": 0.8,
+        "precision": 0.08,
+        "mrr": 0.75,
+        "ndcg": 0.7630929753571458
+      }
+    },
+    "computed_comparative": {
+      "1": {
+        "recall": 0.5333333333333333,
+        "precision": 0.5333333333333333,
+        "mrr": 0.5333333333333333,
+        "ndcg": 0.5333333333333333
+      },
+      "3": {
+        "recall": 0.6666666666666666,
+        "precision": 0.2222222222222222,
+        "mrr": 0.5888888888888889,
+        "ndcg": 0.6087286502380972
+      },
+      "5": {
+        "recall": 0.8,
+        "precision": 0.16000000000000003,
+        "mrr": 0.6222222222222222,
+        "ndcg": 0.6661521913145496
+      },
+      "10": {
+        "recall": 0.9333333333333333,
+        "precision": 0.09333333333333334,
+        "mrr": 0.6444444444444444,
+        "ndcg": 0.7136464829289525
+      }
+    }
+  },
+  "tier_counts": {
+    "simple_lookup": 15,
+    "filtered_lookup": 10,
+    "computed_comparative": 15
+  },
+  "excluded_refusal_count": 10,
+  "results": [
+    {
+      "id": "q001",
+      "tier": "simple_lookup",
+      "source_doc": "castellum-10q",
+      "question": "What was Castellum's total revenue for the three months ended June 30, 2026?",
+      "found": true,
+      "first_hit_rank": 1,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 1.0,
+          "precision": 1.0,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "3": {
+          "recall": 1.0,
+          "precision": 0.3333333333333333,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "5": {
+          "recall": 1.0,
+          "precision": 0.2,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "10": {
+          "recall": 1.0,
+          "precision": 0.1,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        }
+      }
+    },
+    {
+      "id": "q002",
+      "tier": "simple_lookup",
+      "source_doc": "castellum-10q",
+      "question": "What was Castellum's total assets as of June 30, 2026?",
+      "found": false,
+      "first_hit_rank": null,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "3": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "5": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "10": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        }
+      }
+    },
+    {
+      "id": "q003",
+      "tier": "simple_lookup",
+      "source_doc": "castellum-10q",
+      "question": "What was Castellum's cash balance as of June 30, 2026?",
+      "found": false,
+      "first_hit_rank": null,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "3": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "5": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "10": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        }
+      }
+    },
+    {
+      "id": "q004",
+      "tier": "filtered_lookup",
+      "source_doc": "castellum-10q",
+      "question": "What was Castellum's total revenue for the three months ended June 30, 2025 (the prior-year comparative quarter, not 2026)?",
+      "found": true,
+      "first_hit_rank": 1,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 1.0,
+          "precision": 1.0,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "3": {
+          "recall": 1.0,
+          "precision": 0.3333333333333333,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "5": {
+          "recall": 1.0,
+          "precision": 0.2,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "10": {
+          "recall": 1.0,
+          "precision": 0.1,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        }
+      }
+    },
+    {
+      "id": "q005",
+      "tier": "filtered_lookup",
+      "source_doc": "castellum-10q",
+      "question": "What was Castellum's total assets as of December 31, 2025 (not June 30, 2026)?",
+      "found": false,
+      "first_hit_rank": null,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "3": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "5": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "10": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        }
+      }
+    },
+    {
+      "id": "q006",
+      "tier": "computed_comparative",
+      "source_doc": "castellum-10q",
+      "question": "What was Castellum's gross margin (gross profit divided by revenue), as a percentage, for the three months ended June 30, 2026?",
+      "found": true,
+      "first_hit_rank": 1,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 1.0,
+          "precision": 1.0,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "3": {
+          "recall": 1.0,
+          "precision": 0.3333333333333333,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "5": {
+          "recall": 1.0,
+          "precision": 0.2,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "10": {
+          "recall": 1.0,
+          "precision": 0.1,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        }
+      }
+    },
+    {
+      "id": "q007",
+      "tier": "computed_comparative",
+      "source_doc": "castellum-10q",
+      "question": "By how many dollars did Castellum's total revenue grow for the six months ended June 30, 2026 compared to the six months ended June 30, 2025?",
+      "found": false,
+      "first_hit_rank": null,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "3": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "5": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "10": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        }
+      }
+    },
+    {
+      "id": "q008",
+      "tier": "computed_comparative",
+      "source_doc": "castellum-10q",
+      "question": "By what percentage did Castellum's total operating expenses increase for the three months ended June 30, 2026 compared to the same period in 2025?",
+      "found": true,
+      "first_hit_rank": 1,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 1.0,
+          "precision": 1.0,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "3": {
+          "recall": 1.0,
+          "precision": 0.3333333333333333,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "5": {
+          "recall": 1.0,
+          "precision": 0.2,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "10": {
+          "recall": 1.0,
+          "precision": 0.1,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        }
+      }
+    },
+    {
+      "id": "q011",
+      "tier": "simple_lookup",
+      "source_doc": "ironstone-properties-10q",
+      "question": "What was Ironstone Properties' total assets as of March 31, 2026?",
+      "found": true,
+      "first_hit_rank": 1,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 1.0,
+          "precision": 1.0,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "3": {
+          "recall": 1.0,
+          "precision": 0.3333333333333333,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "5": {
+          "recall": 1.0,
+          "precision": 0.2,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "10": {
+          "recall": 1.0,
+          "precision": 0.1,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        }
+      }
+    },
+    {
+      "id": "q012",
+      "tier": "simple_lookup",
+      "source_doc": "ironstone-properties-10q",
+      "question": "What was Ironstone Properties' cash balance as of March 31, 2026?",
+      "found": true,
+      "first_hit_rank": 1,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 1.0,
+          "precision": 1.0,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "3": {
+          "recall": 1.0,
+          "precision": 0.3333333333333333,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "5": {
+          "recall": 1.0,
+          "precision": 0.2,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "10": {
+          "recall": 1.0,
+          "precision": 0.1,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        }
+      }
+    },
+    {
+      "id": "q013",
+      "tier": "simple_lookup",
+      "source_doc": "ironstone-properties-10q",
+      "question": "What was Ironstone Properties' net operating loss for the three months ended March 31, 2026?",
+      "found": true,
+      "first_hit_rank": 1,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 1.0,
+          "precision": 1.0,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "3": {
+          "recall": 1.0,
+          "precision": 0.3333333333333333,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "5": {
+          "recall": 1.0,
+          "precision": 0.2,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "10": {
+          "recall": 1.0,
+          "precision": 0.1,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        }
+      }
+    },
+    {
+      "id": "q014",
+      "tier": "filtered_lookup",
+      "source_doc": "ironstone-properties-10q",
+      "question": "What was Ironstone Properties' total liabilities as of December 31, 2025 (not March 31, 2026)?",
+      "found": true,
+      "first_hit_rank": 1,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 1.0,
+          "precision": 1.0,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "3": {
+          "recall": 1.0,
+          "precision": 0.3333333333333333,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "5": {
+          "recall": 1.0,
+          "precision": 0.2,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "10": {
+          "recall": 1.0,
+          "precision": 0.1,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        }
+      }
+    },
+    {
+      "id": "q015",
+      "tier": "filtered_lookup",
+      "source_doc": "ironstone-properties-10q",
+      "question": "What was Ironstone Properties' interest expense for the three months ended March 31, 2025 (the prior-year comparative period, not 2026)?",
+      "found": true,
+      "first_hit_rank": 1,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 1.0,
+          "precision": 1.0,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "3": {
+          "recall": 1.0,
+          "precision": 0.3333333333333333,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "5": {
+          "recall": 1.0,
+          "precision": 0.2,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "10": {
+          "recall": 1.0,
+          "precision": 0.1,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        }
+      }
+    },
+    {
+      "id": "q016",
+      "tier": "computed_comparative",
+      "source_doc": "ironstone-properties-10q",
+      "question": "By how many dollars did Ironstone Properties' total operating expenses increase for the three months ended March 31, 2026 compared to the same period in 2025?",
+      "found": true,
+      "first_hit_rank": 1,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 1.0,
+          "precision": 1.0,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "3": {
+          "recall": 1.0,
+          "precision": 0.3333333333333333,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "5": {
+          "recall": 1.0,
+          "precision": 0.2,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "10": {
+          "recall": 1.0,
+          "precision": 0.1,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        }
+      }
+    },
+    {
+      "id": "q017",
+      "tier": "computed_comparative",
+      "source_doc": "ironstone-properties-10q",
+      "question": "By how many dollars did Ironstone Properties' total stockholders' equity deficit widen (become more negative) from December 31, 2025 to March 31, 2026?",
+      "found": true,
+      "first_hit_rank": 1,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 1.0,
+          "precision": 1.0,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "3": {
+          "recall": 1.0,
+          "precision": 0.3333333333333333,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "5": {
+          "recall": 1.0,
+          "precision": 0.2,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "10": {
+          "recall": 1.0,
+          "precision": 0.1,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        }
+      }
+    },
+    {
+      "id": "q018",
+      "tier": "computed_comparative",
+      "source_doc": "ironstone-properties-10q",
+      "question": "By what percentage did Ironstone Properties' net operating loss increase for the three months ended March 31, 2026 compared to the same period in 2025?",
+      "found": true,
+      "first_hit_rank": 1,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 1.0,
+          "precision": 1.0,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "3": {
+          "recall": 1.0,
+          "precision": 0.3333333333333333,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "5": {
+          "recall": 1.0,
+          "precision": 0.2,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "10": {
+          "recall": 1.0,
+          "precision": 0.1,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        }
+      }
+    },
+    {
+      "id": "q021",
+      "tier": "simple_lookup",
+      "source_doc": "regen-bio-pharma-10q",
+      "question": "What was Regen BioPharma's total assets as of December 31, 2025?",
+      "found": true,
+      "first_hit_rank": 2,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "3": {
+          "recall": 1.0,
+          "precision": 0.3333333333333333,
+          "mrr": 0.5,
+          "ndcg": 0.6309297535714575
+        },
+        "5": {
+          "recall": 1.0,
+          "precision": 0.2,
+          "mrr": 0.5,
+          "ndcg": 0.6309297535714575
+        },
+        "10": {
+          "recall": 1.0,
+          "precision": 0.1,
+          "mrr": 0.5,
+          "ndcg": 0.6309297535714575
+        }
+      }
+    },
+    {
+      "id": "q022",
+      "tier": "simple_lookup",
+      "source_doc": "regen-bio-pharma-10q",
+      "question": "What was Regen BioPharma's net loss for the three months ended December 31, 2025?",
+      "found": true,
+      "first_hit_rank": 1,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 1.0,
+          "precision": 1.0,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "3": {
+          "recall": 1.0,
+          "precision": 0.3333333333333333,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "5": {
+          "recall": 1.0,
+          "precision": 0.2,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "10": {
+          "recall": 1.0,
+          "precision": 0.1,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        }
+      }
+    },
+    {
+      "id": "q023",
+      "tier": "simple_lookup",
+      "source_doc": "regen-bio-pharma-10q",
+      "question": "What were Regen BioPharma's total operating expenses for the three months ended December 31, 2025?",
+      "found": true,
+      "first_hit_rank": 2,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "3": {
+          "recall": 1.0,
+          "precision": 0.3333333333333333,
+          "mrr": 0.5,
+          "ndcg": 0.6309297535714575
+        },
+        "5": {
+          "recall": 1.0,
+          "precision": 0.2,
+          "mrr": 0.5,
+          "ndcg": 0.6309297535714575
+        },
+        "10": {
+          "recall": 1.0,
+          "precision": 0.1,
+          "mrr": 0.5,
+          "ndcg": 0.6309297535714575
+        }
+      }
+    },
+    {
+      "id": "q024",
+      "tier": "filtered_lookup",
+      "source_doc": "regen-bio-pharma-10q",
+      "question": "What was Regen BioPharma's cash balance as of September 30, 2025 (not December 31, 2025)?",
+      "found": true,
+      "first_hit_rank": 2,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "3": {
+          "recall": 1.0,
+          "precision": 0.3333333333333333,
+          "mrr": 0.5,
+          "ndcg": 0.6309297535714575
+        },
+        "5": {
+          "recall": 1.0,
+          "precision": 0.2,
+          "mrr": 0.5,
+          "ndcg": 0.6309297535714575
+        },
+        "10": {
+          "recall": 1.0,
+          "precision": 0.1,
+          "mrr": 0.5,
+          "ndcg": 0.6309297535714575
+        }
+      }
+    },
+    {
+      "id": "q025",
+      "tier": "filtered_lookup",
+      "source_doc": "regen-bio-pharma-10q",
+      "question": "What was Regen BioPharma's net loss for the three months ended December 31, 2024 (the prior-year comparative period, not 2025)?",
+      "found": true,
+      "first_hit_rank": 1,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 1.0,
+          "precision": 1.0,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "3": {
+          "recall": 1.0,
+          "precision": 0.3333333333333333,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "5": {
+          "recall": 1.0,
+          "precision": 0.2,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "10": {
+          "recall": 1.0,
+          "precision": 0.1,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        }
+      }
+    },
+    {
+      "id": "q026",
+      "tier": "computed_comparative",
+      "source_doc": "regen-bio-pharma-10q",
+      "question": "By how many dollars did Regen BioPharma's total operating expenses increase for the three months ended December 31, 2025 compared to the same period in 2024?",
+      "found": true,
+      "first_hit_rank": 3,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "3": {
+          "recall": 1.0,
+          "precision": 0.3333333333333333,
+          "mrr": 0.3333333333333333,
+          "ndcg": 0.5
+        },
+        "5": {
+          "recall": 1.0,
+          "precision": 0.2,
+          "mrr": 0.3333333333333333,
+          "ndcg": 0.5
+        },
+        "10": {
+          "recall": 1.0,
+          "precision": 0.1,
+          "mrr": 0.3333333333333333,
+          "ndcg": 0.5
+        }
+      }
+    },
+    {
+      "id": "q027",
+      "tier": "computed_comparative",
+      "source_doc": "regen-bio-pharma-10q",
+      "question": "By what percentage did Regen BioPharma's total assets decrease from September 30, 2025 to December 31, 2025?",
+      "found": true,
+      "first_hit_rank": 4,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "3": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "5": {
+          "recall": 1.0,
+          "precision": 0.2,
+          "mrr": 0.25,
+          "ndcg": 0.43067655807339306
+        },
+        "10": {
+          "recall": 1.0,
+          "precision": 0.1,
+          "mrr": 0.25,
+          "ndcg": 0.43067655807339306
+        }
+      }
+    },
+    {
+      "id": "q028",
+      "tier": "computed_comparative",
+      "source_doc": "regen-bio-pharma-10q",
+      "question": "What was Regen BioPharma's loss from operations for the three months ended December 31, 2025, computed as net revenue minus total operating expenses?",
+      "found": true,
+      "first_hit_rank": 1,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 1.0,
+          "precision": 1.0,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "3": {
+          "recall": 1.0,
+          "precision": 0.3333333333333333,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "5": {
+          "recall": 1.0,
+          "precision": 0.2,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "10": {
+          "recall": 1.0,
+          "precision": 0.1,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        }
+      }
+    },
+    {
+      "id": "q031",
+      "tier": "simple_lookup",
+      "source_doc": "xerian-10q",
+      "question": "What was Xeriant's total assets as of December 31, 2025?",
+      "found": true,
+      "first_hit_rank": 1,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 1.0,
+          "precision": 1.0,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "3": {
+          "recall": 1.0,
+          "precision": 0.3333333333333333,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "5": {
+          "recall": 1.0,
+          "precision": 0.2,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "10": {
+          "recall": 1.0,
+          "precision": 0.1,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        }
+      }
+    },
+    {
+      "id": "q032",
+      "tier": "simple_lookup",
+      "source_doc": "xerian-10q",
+      "question": "What were Xeriant's total operating expenses for the six months ended December 31, 2025?",
+      "found": true,
+      "first_hit_rank": 1,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 1.0,
+          "precision": 1.0,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "3": {
+          "recall": 1.0,
+          "precision": 0.3333333333333333,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "5": {
+          "recall": 1.0,
+          "precision": 0.2,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "10": {
+          "recall": 1.0,
+          "precision": 0.1,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        }
+      }
+    },
+    {
+      "id": "q033",
+      "tier": "simple_lookup",
+      "source_doc": "xerian-10q",
+      "question": "What was Xeriant's net cash used in operating activities for the six months ended December 31, 2025?",
+      "found": true,
+      "first_hit_rank": 1,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 1.0,
+          "precision": 1.0,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "3": {
+          "recall": 1.0,
+          "precision": 0.3333333333333333,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "5": {
+          "recall": 1.0,
+          "precision": 0.2,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "10": {
+          "recall": 1.0,
+          "precision": 0.1,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        }
+      }
+    },
+    {
+      "id": "q034",
+      "tier": "filtered_lookup",
+      "source_doc": "xerian-10q",
+      "question": "What was Xeriant's total assets as of June 30, 2025 (the prior fiscal year-end, not December 31, 2025)?",
+      "found": true,
+      "first_hit_rank": 1,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 1.0,
+          "precision": 1.0,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "3": {
+          "recall": 1.0,
+          "precision": 0.3333333333333333,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "5": {
+          "recall": 1.0,
+          "precision": 0.2,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "10": {
+          "recall": 1.0,
+          "precision": 0.1,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        }
+      }
+    },
+    {
+      "id": "q035",
+      "tier": "filtered_lookup",
+      "source_doc": "xerian-10q",
+      "question": "What was Xeriant's net loss for the three months ended December 31, 2024 (the prior-year comparative quarter, not 2025)?",
+      "found": false,
+      "first_hit_rank": null,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "3": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "5": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "10": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        }
+      }
+    },
+    {
+      "id": "q036",
+      "tier": "computed_comparative",
+      "source_doc": "xerian-10q",
+      "question": "By how many dollars did Xeriant's net loss decrease for the three months ended December 31, 2025 compared to the same period in 2024?",
+      "found": true,
+      "first_hit_rank": 6,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "3": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "5": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "10": {
+          "recall": 1.0,
+          "precision": 0.1,
+          "mrr": 0.16666666666666666,
+          "ndcg": 0.3562071871080222
+        }
+      }
+    },
+    {
+      "id": "q037",
+      "tier": "computed_comparative",
+      "source_doc": "xerian-10q",
+      "question": "By what percentage did Xeriant's research and development expense increase for the six months ended December 31, 2025 compared to the same period in 2024?",
+      "found": true,
+      "first_hit_rank": 6,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "3": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "5": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "10": {
+          "recall": 1.0,
+          "precision": 0.1,
+          "mrr": 0.16666666666666666,
+          "ndcg": 0.3562071871080222
+        }
+      }
+    },
+    {
+      "id": "q038",
+      "tier": "computed_comparative",
+      "source_doc": "xerian-10q",
+      "question": "What was the total dollar swing in Xeriant's six-month net income (loss) attributable to common stockholders, from a loss in the prior year to income in the current year (six months ended December 31, 2025 vs. 2024)?",
+      "found": true,
+      "first_hit_rank": 2,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "3": {
+          "recall": 1.0,
+          "precision": 0.3333333333333333,
+          "mrr": 0.5,
+          "ndcg": 0.6309297535714575
+        },
+        "5": {
+          "recall": 1.0,
+          "precision": 0.2,
+          "mrr": 0.5,
+          "ndcg": 0.6309297535714575
+        },
+        "10": {
+          "recall": 1.0,
+          "precision": 0.1,
+          "mrr": 0.5,
+          "ndcg": 0.6309297535714575
+        }
+      }
+    },
+    {
+      "id": "q041",
+      "tier": "simple_lookup",
+      "source_doc": "alternus-10q",
+      "question": "What was Alternus Clean Energy's total assets as of March 31, 2026, in thousands of dollars as reported?",
+      "found": true,
+      "first_hit_rank": 1,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 1.0,
+          "precision": 1.0,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "3": {
+          "recall": 1.0,
+          "precision": 0.3333333333333333,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "5": {
+          "recall": 1.0,
+          "precision": 0.2,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "10": {
+          "recall": 1.0,
+          "precision": 0.1,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        }
+      }
+    },
+    {
+      "id": "q042",
+      "tier": "simple_lookup",
+      "source_doc": "alternus-10q",
+      "question": "What was Alternus Clean Energy's cash and cash equivalents balance as of March 31, 2026, in thousands of dollars as reported?",
+      "found": true,
+      "first_hit_rank": 1,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 1.0,
+          "precision": 1.0,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "3": {
+          "recall": 1.0,
+          "precision": 0.3333333333333333,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "5": {
+          "recall": 1.0,
+          "precision": 0.2,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "10": {
+          "recall": 1.0,
+          "precision": 0.1,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        }
+      }
+    },
+    {
+      "id": "q043",
+      "tier": "simple_lookup",
+      "source_doc": "alternus-10q",
+      "question": "What were Alternus Clean Energy's total revenues for the three months ended March 31, 2026?",
+      "found": true,
+      "first_hit_rank": 1,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 1.0,
+          "precision": 1.0,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "3": {
+          "recall": 1.0,
+          "precision": 0.3333333333333333,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "5": {
+          "recall": 1.0,
+          "precision": 0.2,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "10": {
+          "recall": 1.0,
+          "precision": 0.1,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        }
+      }
+    },
+    {
+      "id": "q044",
+      "tier": "filtered_lookup",
+      "source_doc": "alternus-10q",
+      "question": "What was Alternus Clean Energy's total assets as of December 31, 2025 (not March 31, 2026), in thousands of dollars as reported?",
+      "found": true,
+      "first_hit_rank": 1,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 1.0,
+          "precision": 1.0,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "3": {
+          "recall": 1.0,
+          "precision": 0.3333333333333333,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "5": {
+          "recall": 1.0,
+          "precision": 0.2,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "10": {
+          "recall": 1.0,
+          "precision": 0.1,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        }
+      }
+    },
+    {
+      "id": "q045",
+      "tier": "filtered_lookup",
+      "source_doc": "alternus-10q",
+      "question": "What was Alternus Clean Energy's net cash used in operating activities for the three months ended March 31, 2025 (the prior-year comparative period, not 2026), in thousands of dollars as reported?",
+      "found": true,
+      "first_hit_rank": 1,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 1.0,
+          "precision": 1.0,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "3": {
+          "recall": 1.0,
+          "precision": 0.3333333333333333,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "5": {
+          "recall": 1.0,
+          "precision": 0.2,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "10": {
+          "recall": 1.0,
+          "precision": 0.1,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        }
+      }
+    },
+    {
+      "id": "q046",
+      "tier": "computed_comparative",
+      "source_doc": "alternus-10q",
+      "question": "By how many thousands of dollars did Alternus Clean Energy's net cash used in operating activities increase for the three months ended March 31, 2026 compared to the same period in 2025?",
+      "found": true,
+      "first_hit_rank": 1,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 1.0,
+          "precision": 1.0,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "3": {
+          "recall": 1.0,
+          "precision": 0.3333333333333333,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "5": {
+          "recall": 1.0,
+          "precision": 0.2,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "10": {
+          "recall": 1.0,
+          "precision": 0.1,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        }
+      }
+    },
+    {
+      "id": "q047",
+      "tier": "computed_comparative",
+      "source_doc": "alternus-10q",
+      "question": "What was Alternus Clean Energy's total shareholders' equity as a percentage of total assets as of March 31, 2026?",
+      "found": true,
+      "first_hit_rank": 4,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "3": {
+          "recall": 0.0,
+          "precision": 0.0,
+          "mrr": 0.0,
+          "ndcg": 0.0
+        },
+        "5": {
+          "recall": 1.0,
+          "precision": 0.2,
+          "mrr": 0.25,
+          "ndcg": 0.43067655807339306
+        },
+        "10": {
+          "recall": 1.0,
+          "precision": 0.1,
+          "mrr": 0.25,
+          "ndcg": 0.43067655807339306
+        }
+      }
+    },
+    {
+      "id": "q048",
+      "tier": "computed_comparative",
+      "source_doc": "alternus-10q",
+      "question": "By how many thousands of dollars did Alternus Clean Energy's total liabilities change from December 31, 2025 to March 31, 2026?",
+      "found": true,
+      "first_hit_rank": 1,
+      "num_candidates": 10,
+      "scores": {
+        "1": {
+          "recall": 1.0,
+          "precision": 1.0,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "3": {
+          "recall": 1.0,
+          "precision": 0.3333333333333333,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "5": {
+          "recall": 1.0,
+          "precision": 0.2,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        },
+        "10": {
+          "recall": 1.0,
+          "precision": 0.1,
+          "mrr": 1.0,
+          "ndcg": 1.0
+        }
+      }
+    }
+  ]
+}
