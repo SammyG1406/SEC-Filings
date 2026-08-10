@@ -18,7 +18,7 @@ FILINGS = {
     "ironstone-properties-10q": "Ironstone Properties 10Q.pdf",
     "regen-bio-pharma-10q": "Regen Bio Pharma 10Q.pdf",
     "xerian-10q": "Xerian 10Q.pdf",
-    "alce-10q": "alce20260331_10q.htm.pdf",
+    "alternus-10q": "Alternus 10Q.pdf",
 }
 
 
