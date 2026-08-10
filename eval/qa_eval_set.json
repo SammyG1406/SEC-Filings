@@ -1,0 +1,502 @@
+[
+  {
+    "id": "q001",
+    "question": "What was Castellum's total revenue for the three months ended June 30, 2026?",
+    "expected_answer": 13864676,
+    "answer_type": "numeric",
+    "source_doc": "castellum-10q",
+    "answer_anchor": "Revenues $ 13,864,676 $ 14,024,090 $ 28,156,637 $ 25,688,455",
+    "tier": "simple_lookup",
+    "page": 8
+  },
+  {
+    "id": "q002",
+    "question": "What was Castellum's total assets as of June 30, 2026?",
+    "expected_answer": 41826807,
+    "answer_type": "numeric",
+    "source_doc": "castellum-10q",
+    "answer_anchor": "Total Assets $ 41,826,807 $ 41,902,844",
+    "tier": "simple_lookup",
+    "page": 7
+  },
+  {
+    "id": "q003",
+    "question": "What was Castellum's cash balance as of June 30, 2026?",
+    "expected_answer": 16865160,
+    "answer_type": "numeric",
+    "source_doc": "castellum-10q",
+    "answer_anchor": "Cash $ 16,865,160 $ 14,884,778",
+    "tier": "simple_lookup",
+    "page": 7
+  },
+  {
+    "id": "q004",
+    "question": "What was Castellum's total revenue for the three months ended June 30, 2025 (the prior-year comparative quarter, not 2026)?",
+    "expected_answer": 14024090,
+    "answer_type": "numeric",
+    "source_doc": "castellum-10q",
+    "answer_anchor": "Revenues $ 13,864,676 $ 14,024,090 $ 28,156,637 $ 25,688,455",
+    "tier": "filtered_lookup",
+    "page": 8
+  },
+  {
+    "id": "q005",
+    "question": "What was Castellum's total assets as of December 31, 2025 (not June 30, 2026)?",
+    "expected_answer": 41902844,
+    "answer_type": "numeric",
+    "source_doc": "castellum-10q",
+    "answer_anchor": "Total Assets $ 41,826,807 $ 41,902,844",
+    "tier": "filtered_lookup",
+    "page": 7
+  },
+  {
+    "id": "q006",
+    "question": "What was Castellum's gross margin (gross profit divided by revenue), as a percentage, for the three months ended June 30, 2026?",
+    "expected_answer": 34.04,
+    "answer_type": "numeric",
+    "source_doc": "castellum-10q",
+    "answer_anchor": "Revenues $ 13,864,676 ... Gross Profit 4,719,419 5,060,447 9,781,640 9,615,063",
+    "tier": "computed_comparative",
+    "page": 8
+  },
+  {
+    "id": "q007",
+    "question": "By how many dollars did Castellum's total revenue grow for the six months ended June 30, 2026 compared to the six months ended June 30, 2025?",
+    "expected_answer": 2468182,
+    "answer_type": "numeric",
+    "source_doc": "castellum-10q",
+    "answer_anchor": "Total revenue was $28,156,637 for the six months ended June 30, 2026 as compared to total revenue of $25,688,455 for the six months ended June 30, 2025",
+    "tier": "computed_comparative",
+    "page": 8
+  },
+  {
+    "id": "q008",
+    "question": "By what percentage did Castellum's total operating expenses increase for the three months ended June 30, 2026 compared to the same period in 2025?",
+    "expected_answer": 6.79,
+    "answer_type": "numeric",
+    "source_doc": "castellum-10q",
+    "answer_anchor": "Total operating expenses 5,813,511 5,443,970 11,573,729 11,484,593",
+    "tier": "computed_comparative",
+    "page": 8
+  },
+  {
+    "id": "q009",
+    "question": "What was Castellum's total revenue for the three months ended June 30, 2027?",
+    "expected_answer": null,
+    "answer_type": "refusal",
+    "source_doc": "castellum-10q",
+    "answer_anchor": null,
+    "tier": "refusal",
+    "page": null
+  },
+  {
+    "id": "q010",
+    "question": "What dividend per share did Castellum pay on its common stock during the six months ended June 30, 2026?",
+    "expected_answer": null,
+    "answer_type": "refusal",
+    "source_doc": "castellum-10q",
+    "answer_anchor": null,
+    "tier": "refusal",
+    "page": null
+  },
+  {
+    "id": "q011",
+    "question": "What was Ironstone Properties' total assets as of March 31, 2026?",
+    "expected_answer": 3273802,
+    "answer_type": "numeric",
+    "source_doc": "ironstone-properties-10q",
+    "answer_anchor": "Total Assets  $ 3,273,802  $ 3,277,004",
+    "tier": "simple_lookup",
+    "page": 4
+  },
+  {
+    "id": "q012",
+    "question": "What was Ironstone Properties' cash balance as of March 31, 2026?",
+    "expected_answer": 112443,
+    "answer_type": "numeric",
+    "source_doc": "ironstone-properties-10q",
+    "answer_anchor": "Cash  $ 112,443  $ 115,646",
+    "tier": "simple_lookup",
+    "page": 4
+  },
+  {
+    "id": "q013",
+    "question": "What was Ironstone Properties' net operating loss for the three months ended March 31, 2026?",
+    "expected_answer": -88056,
+    "answer_type": "numeric",
+    "source_doc": "ironstone-properties-10q",
+    "answer_anchor": "Net operating gain (loss)  $ (88,056) $ (76,387)",
+    "tier": "simple_lookup",
+    "page": 5
+  },
+  {
+    "id": "q014",
+    "question": "What was Ironstone Properties' total liabilities as of December 31, 2025 (not March 31, 2026)?",
+    "expected_answer": 3703399,
+    "answer_type": "numeric",
+    "source_doc": "ironstone-properties-10q",
+    "answer_anchor": "Total liabilities  $ 3,771,934  $ 3,703,399",
+    "tier": "filtered_lookup",
+    "page": 4
+  },
+  {
+    "id": "q015",
+    "question": "What was Ironstone Properties' interest expense for the three months ended March 31, 2025 (the prior-year comparative period, not 2026)?",
+    "expected_answer": 60058,
+    "answer_type": "numeric",
+    "source_doc": "ironstone-properties-10q",
+    "answer_anchor": "Interest expense   61,503   60,058",
+    "tier": "filtered_lookup",
+    "page": 5
+  },
+  {
+    "id": "q016",
+    "question": "By how many dollars did Ironstone Properties' total operating expenses increase for the three months ended March 31, 2026 compared to the same period in 2025?",
+    "expected_answer": 10224,
+    "answer_type": "numeric",
+    "source_doc": "ironstone-properties-10q",
+    "answer_anchor": "Total operating expenses   26,553   16,329",
+    "tier": "computed_comparative",
+    "page": 5
+  },
+  {
+    "id": "q017",
+    "question": "By how many dollars did Ironstone Properties' total stockholders' equity deficit widen (become more negative) from December 31, 2025 to March 31, 2026?",
+    "expected_answer": 71737,
+    "answer_type": "numeric",
+    "source_doc": "ironstone-properties-10q",
+    "answer_anchor": "Total stockholders' equity   (498,132)  (426,395)",
+    "tier": "computed_comparative",
+    "page": 4
+  },
+  {
+    "id": "q018",
+    "question": "By what percentage did Ironstone Properties' net operating loss increase for the three months ended March 31, 2026 compared to the same period in 2025?",
+    "expected_answer": 15.28,
+    "answer_type": "numeric",
+    "source_doc": "ironstone-properties-10q",
+    "answer_anchor": "Net operating gain (loss)  $ (88,056) $ (76,387)",
+    "tier": "computed_comparative",
+    "page": 5
+  },
+  {
+    "id": "q019",
+    "question": "What was Ironstone Properties' total revenue for the three months ended March 31, 2026?",
+    "expected_answer": null,
+    "answer_type": "refusal",
+    "source_doc": "ironstone-properties-10q",
+    "answer_anchor": null,
+    "tier": "refusal",
+    "page": null
+  },
+  {
+    "id": "q020",
+    "question": "What was Ironstone Properties' total assets as of March 31, 2027?",
+    "expected_answer": null,
+    "answer_type": "refusal",
+    "source_doc": "ironstone-properties-10q",
+    "answer_anchor": null,
+    "tier": "refusal",
+    "page": null
+  },
+  {
+    "id": "q021",
+    "question": "What was Regen BioPharma's total assets as of December 31, 2025?",
+    "expected_answer": 237076,
+    "answer_type": "numeric",
+    "source_doc": "regen-bio-pharma-10q",
+    "answer_anchor": "TOTAL ASSETS  $ 237,076  $ 274,628",
+    "tier": "simple_lookup",
+    "page": 2
+  },
+  {
+    "id": "q022",
+    "question": "What was Regen BioPharma's net loss for the three months ended December 31, 2025?",
+    "expected_answer": -967853,
+    "answer_type": "numeric",
+    "source_doc": "regen-bio-pharma-10q",
+    "answer_anchor": "Net loss   (967,853)  (515,384)",
+    "tier": "simple_lookup",
+    "page": 3
+  },
+  {
+    "id": "q023",
+    "question": "What were Regen BioPharma's total operating expenses for the three months ended December 31, 2025?",
+    "expected_answer": 610689,
+    "answer_type": "numeric",
+    "source_doc": "regen-bio-pharma-10q",
+    "answer_anchor": "Total operating expenses   610,689   120,443",
+    "tier": "simple_lookup",
+    "page": 3
+  },
+  {
+    "id": "q024",
+    "question": "What was Regen BioPharma's cash balance as of September 30, 2025 (not December 31, 2025)?",
+    "expected_answer": 69555,
+    "answer_type": "numeric",
+    "source_doc": "regen-bio-pharma-10q",
+    "answer_anchor": "Cash  $ 4,578  $ 69,555",
+    "tier": "filtered_lookup",
+    "page": 2
+  },
+  {
+    "id": "q025",
+    "question": "What was Regen BioPharma's net loss for the three months ended December 31, 2024 (the prior-year comparative period, not 2025)?",
+    "expected_answer": -515384,
+    "answer_type": "numeric",
+    "source_doc": "regen-bio-pharma-10q",
+    "answer_anchor": "Net loss   (967,853)  (515,384)",
+    "tier": "filtered_lookup",
+    "page": 3
+  },
+  {
+    "id": "q026",
+    "question": "By how many dollars did Regen BioPharma's total operating expenses increase for the three months ended December 31, 2025 compared to the same period in 2024?",
+    "expected_answer": 490246,
+    "answer_type": "numeric",
+    "source_doc": "regen-bio-pharma-10q",
+    "answer_anchor": "Total operating expenses   610,689   120,443",
+    "tier": "computed_comparative",
+    "page": 3
+  },
+  {
+    "id": "q027",
+    "question": "By what percentage did Regen BioPharma's total assets decrease from September 30, 2025 to December 31, 2025?",
+    "expected_answer": -13.68,
+    "answer_type": "numeric",
+    "source_doc": "regen-bio-pharma-10q",
+    "answer_anchor": "TOTAL ASSETS  $ 237,076  $ 274,628",
+    "tier": "computed_comparative",
+    "page": 2
+  },
+  {
+    "id": "q028",
+    "question": "What was Regen BioPharma's loss from operations for the three months ended December 31, 2025, computed as net revenue minus total operating expenses?",
+    "expected_answer": -551624,
+    "answer_type": "numeric",
+    "source_doc": "regen-bio-pharma-10q",
+    "answer_anchor": "Net revenue   59,065  $ 59,065 ... Total operating expenses   610,689   120,443",
+    "tier": "computed_comparative",
+    "page": 3
+  },
+  {
+    "id": "q029",
+    "question": "What was Regen BioPharma's total revenue for the full fiscal year ended September 30, 2026?",
+    "expected_answer": null,
+    "answer_type": "refusal",
+    "source_doc": "regen-bio-pharma-10q",
+    "answer_anchor": null,
+    "tier": "refusal",
+    "page": null
+  },
+  {
+    "id": "q030",
+    "question": "How many full-time employees did Regen BioPharma have as of December 31, 2025?",
+    "expected_answer": null,
+    "answer_type": "refusal",
+    "source_doc": "regen-bio-pharma-10q",
+    "answer_anchor": null,
+    "tier": "refusal",
+    "page": null
+  },
+  {
+    "id": "q031",
+    "question": "What was Xeriant's total assets as of December 31, 2025?",
+    "expected_answer": 103440,
+    "answer_type": "numeric",
+    "source_doc": "xerian-10q",
+    "answer_anchor": "Total assets  $ 103,440  $ 68,219",
+    "tier": "simple_lookup",
+    "page": 5
+  },
+  {
+    "id": "q032",
+    "question": "What were Xeriant's total operating expenses for the six months ended December 31, 2025?",
+    "expected_answer": 535137,
+    "answer_type": "numeric",
+    "source_doc": "xerian-10q",
+    "answer_anchor": "Total operating expenses   231,062   335,583   535,137   694,378",
+    "tier": "simple_lookup",
+    "page": 6
+  },
+  {
+    "id": "q033",
+    "question": "What was Xeriant's net cash used in operating activities for the six months ended December 31, 2025?",
+    "expected_answer": -383317,
+    "answer_type": "numeric",
+    "source_doc": "xerian-10q",
+    "answer_anchor": "Net cash used in operating activities   (383,317)  (750,922)",
+    "tier": "simple_lookup",
+    "page": 11
+  },
+  {
+    "id": "q034",
+    "question": "What was Xeriant's total assets as of June 30, 2025 (the prior fiscal year-end, not December 31, 2025)?",
+    "expected_answer": 68219,
+    "answer_type": "numeric",
+    "source_doc": "xerian-10q",
+    "answer_anchor": "Total assets  $ 103,440  $ 68,219",
+    "tier": "filtered_lookup",
+    "page": 5
+  },
+  {
+    "id": "q035",
+    "question": "What was Xeriant's net loss for the three months ended December 31, 2024 (the prior-year comparative quarter, not 2025)?",
+    "expected_answer": -417269,
+    "answer_type": "numeric",
+    "source_doc": "xerian-10q",
+    "answer_anchor": "Net loss  $ (297,593) $ (417,269) $ 119,676",
+    "tier": "filtered_lookup",
+    "page": 34
+  },
+  {
+    "id": "q036",
+    "question": "By how many dollars did Xeriant's net loss decrease for the three months ended December 31, 2025 compared to the same period in 2024?",
+    "expected_answer": 119676,
+    "answer_type": "numeric",
+    "source_doc": "xerian-10q",
+    "answer_anchor": "Net loss  $ (297,593) $ (417,269) $ 119,676",
+    "tier": "computed_comparative",
+    "page": 34
+  },
+  {
+    "id": "q037",
+    "question": "By what percentage did Xeriant's research and development expense increase for the six months ended December 31, 2025 compared to the same period in 2024?",
+    "expected_answer": 164.41,
+    "answer_type": "numeric",
+    "source_doc": "xerian-10q",
+    "answer_anchor": "Research and development expense   16,303   15   70,269   26,576",
+    "tier": "computed_comparative",
+    "page": 6
+  },
+  {
+    "id": "q038",
+    "question": "What was the total dollar swing in Xeriant's six-month net income (loss) attributable to common stockholders, from a loss in the prior year to income in the current year (six months ended December 31, 2025 vs. 2024)?",
+    "expected_answer": 2703375,
+    "answer_type": "numeric",
+    "source_doc": "xerian-10q",
+    "answer_anchor": "Net income (loss) attributable to common stockholders  $ (297,593) $ (410,050) $ 1,928,479  $ (774,896)",
+    "tier": "computed_comparative",
+    "page": 6
+  },
+  {
+    "id": "q039",
+    "question": "What was Xeriant's total revenue for the six months ended December 31, 2025?",
+    "expected_answer": null,
+    "answer_type": "refusal",
+    "source_doc": "xerian-10q",
+    "answer_anchor": null,
+    "tier": "refusal",
+    "page": null
+  },
+  {
+    "id": "q040",
+    "question": "What was Xeriant's total assets as of December 31, 2026?",
+    "expected_answer": null,
+    "answer_type": "refusal",
+    "source_doc": "xerian-10q",
+    "answer_anchor": null,
+    "tier": "refusal",
+    "page": null
+  },
+  {
+    "id": "q041",
+    "question": "What was Alternus Clean Energy's total assets as of March 31, 2026, in thousands of dollars as reported?",
+    "expected_answer": 56898,
+    "answer_type": "numeric",
+    "source_doc": "alternus-10q",
+    "answer_anchor": "Total Assets  $ 56,898  $ 57,044",
+    "tier": "simple_lookup",
+    "page": 5
+  },
+  {
+    "id": "q042",
+    "question": "What was Alternus Clean Energy's cash and cash equivalents balance as of March 31, 2026, in thousands of dollars as reported?",
+    "expected_answer": 363,
+    "answer_type": "numeric",
+    "source_doc": "alternus-10q",
+    "answer_anchor": "Cash and cash equivalents  $ 363  $ 32",
+    "tier": "simple_lookup",
+    "page": 5
+  },
+  {
+    "id": "q043",
+    "question": "What were Alternus Clean Energy's total revenues for the three months ended March 31, 2026?",
+    "expected_answer": 0,
+    "answer_type": "numeric",
+    "source_doc": "alternus-10q",
+    "answer_anchor": "Revenues  $ -  $ -",
+    "tier": "simple_lookup",
+    "page": 7
+  },
+  {
+    "id": "q044",
+    "question": "What was Alternus Clean Energy's total assets as of December 31, 2025 (not March 31, 2026), in thousands of dollars as reported?",
+    "expected_answer": 57044,
+    "answer_type": "numeric",
+    "source_doc": "alternus-10q",
+    "answer_anchor": "Total Assets  $ 56,898  $ 57,044",
+    "tier": "filtered_lookup",
+    "page": 5
+  },
+  {
+    "id": "q045",
+    "question": "What was Alternus Clean Energy's net cash used in operating activities for the three months ended March 31, 2025 (the prior-year comparative period, not 2026), in thousands of dollars as reported?",
+    "expected_answer": -552,
+    "answer_type": "numeric",
+    "source_doc": "alternus-10q",
+    "answer_anchor": "Net Cash Used in Operating Activities  $ (1,169) $ (552)",
+    "tier": "filtered_lookup",
+    "page": 10
+  },
+  {
+    "id": "q046",
+    "question": "By how many thousands of dollars did Alternus Clean Energy's net cash used in operating activities increase for the three months ended March 31, 2026 compared to the same period in 2025?",
+    "expected_answer": 617,
+    "answer_type": "numeric",
+    "source_doc": "alternus-10q",
+    "answer_anchor": "Net Cash Used in Operating Activities  $ (1,169) $ (552)",
+    "tier": "computed_comparative",
+    "page": 10
+  },
+  {
+    "id": "q047",
+    "question": "What was Alternus Clean Energy's total shareholders' equity as a percentage of total assets as of March 31, 2026?",
+    "expected_answer": 53.92,
+    "answer_type": "numeric",
+    "source_doc": "alternus-10q",
+    "answer_anchor": "Total Shareholders' Equity   30,681   23,022 ... Total Assets  $ 56,898",
+    "tier": "computed_comparative",
+    "page": 5
+  },
+  {
+    "id": "q048",
+    "question": "By how many thousands of dollars did Alternus Clean Energy's total liabilities change from December 31, 2025 to March 31, 2026?",
+    "expected_answer": -8256,
+    "answer_type": "numeric",
+    "source_doc": "alternus-10q",
+    "answer_anchor": "Total Liabilities   25,766   34,022",
+    "tier": "computed_comparative",
+    "page": 5
+  },
+  {
+    "id": "q049",
+    "question": "What was Alternus Clean Energy's total revenue for the three months ended March 31, 2027?",
+    "expected_answer": null,
+    "answer_type": "refusal",
+    "source_doc": "alternus-10q",
+    "answer_anchor": null,
+    "tier": "refusal",
+    "page": null
+  },
+  {
+    "id": "q050",
+    "question": "What was Alternus Clean Energy's cost of goods sold for the three months ended March 31, 2026?",
+    "expected_answer": null,
+    "answer_type": "refusal",
+    "source_doc": "alternus-10q",
+    "answer_anchor": null,
+    "tier": "refusal",
+    "page": null
+  }
+]
