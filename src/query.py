@@ -30,6 +30,27 @@ INDEXES = {
     "alternus": "alternus-10q",
 }
 
+# --- Logical routing ---
+ROUTE_FILING_TOOL = {
+    "name": "route_to_filing",
+    "description": "Identifies which single SEC 10-Q filing, if any, the question is about.",
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "filing": {
+                "type": "string",
+                "enum": [*INDEXES.keys(), "none"],
+                "description": (
+                    "The filing the question is about, chosen from the company keys below. "
+                    "Use 'none' if the question compares multiple companies, doesn't name one, "
+                    "or its scope is otherwise ambiguous."
+                ),
+            }
+        },
+        "required": ["filing"],
+    },
+}
+
 # --- RAG Fusion (query translation) ---
 NUM_QUERY_VARIATIONS = 3
 FUSION_TOP_K_PER_QUERY = 10
@@ -75,6 +96,24 @@ def retrieve(pc: Pinecone, question: str, filing: str | None, top_k: int) -> lis
     hits = [hit for result in results for hit in result]
     hits.sort(key=lambda h: h["score"], reverse=True)
     return hits[:top_k]
+
+
+def route_filing(client: anthropic.Anthropic, question: str) -> str | None:
+    """Logical routing: asks Claude to pick the single filing (if any) the
+    question names, so retrieval can be restricted to just that index instead
+    of searching all five and risking cross-filing confusion."""
+    message = client.messages.create(
+        model=MODEL,
+        max_tokens=100,
+        tools=[ROUTE_FILING_TOOL],
+        tool_choice={"type": "tool", "name": "route_to_filing"},
+        messages=[{"role": "user", "content": question}],
+    )
+    for block in message.content:
+        if block.type == "tool_use":
+            filing = block.input.get("filing")
+            return filing if filing in INDEXES else None
+    return None
 
 
 def generate_query_variations(
@@ -202,11 +241,23 @@ def main() -> None:
     )
     parser.add_argument("--num-variations", type=int, default=NUM_QUERY_VARIATIONS)
     parser.add_argument(
+        "--route",
+        dest="route",
+        action="store_true",
+        default=True,
+        help="Extract the named company from the question and restrict retrieval to its filing "
+        "(default: on). Ignored if --filing is already given explicitly.",
+    )
+    parser.add_argument(
+        "--no-route", dest="route", action="store_false", help="Always search across all filings."
+    )
+    parser.add_argument(
         "--rerank",
         dest="rerank",
         action="store_true",
-        default=True,
-        help="Rerank retrieved candidates against the actual question text before answering (default: on).",
+        default=False,
+        help="Rerank retrieved candidates against the actual question text before answering "
+        "(default: off — regressed computed_comparative and refusal-detection in eval; see eval/reports).",
     )
     parser.add_argument("--no-rerank", dest="rerank", action="store_false", help="Skip reranking.")
     args = parser.parse_args()
@@ -214,16 +265,22 @@ def main() -> None:
     pc = Pinecone(api_key=os.environ["PINECONE_API_KEY"])
     client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
+    filing = args.filing
+    if filing is None and args.route:
+        filing = route_filing(client, args.question)
+        print(f"Routed to filing: {filing}" if filing else "Routed to: all filings (no single company named)")
+        print()
+
     pool_k = RERANK_POOL_SIZE if args.rerank else args.top_k
 
     if args.rag_fusion:
-        hits, variations = retrieve_with_fusion(pc, client, args.question, args.filing, pool_k, args.num_variations)
+        hits, variations = retrieve_with_fusion(pc, client, args.question, filing, pool_k, args.num_variations)
         print("Query variations:")
         for v in variations:
             print(f"  - {v}")
         print()
     else:
-        hits = retrieve(pc, args.question, args.filing, pool_k)
+        hits = retrieve(pc, args.question, filing, pool_k)
 
     if args.rerank:
         hits = rerank(pc, args.question, hits, args.top_k)
