@@ -39,6 +39,7 @@ import math
 import os
 import sys
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -54,6 +55,7 @@ load_dotenv()
 DEFAULT_EVAL_SET = Path(__file__).resolve().parent / "qa_eval_set.json"
 REPORTS_DIR = Path(__file__).resolve().parent / "reports"
 DEFAULT_K_VALUES = (1, 3, 5, 10)
+DEFAULT_MAX_WORKERS = 5  # each question already fans out internally (up to 5x, or 20x under --rag-fusion)
 METRIC_ORDER = ["recall", "precision", "mrr", "ndcg"]
 METRIC_LABELS = {"recall": "Recall@k", "precision": "Precision@k", "mrr": "MRR@k", "ndcg": "NDCG@k"}
 
@@ -110,33 +112,29 @@ def run_evaluation(
     k_values: tuple[int, ...],
     client: anthropic.Anthropic | None = None,
     num_variations: int = NUM_QUERY_VARIATIONS,
+    max_workers: int = DEFAULT_MAX_WORKERS,
 ) -> tuple[list[dict], list[dict]]:
     max_k = max(k_values)
-    results = []
-    skipped = []  # answerable in principle but missing an anchor to score against
+    scoreable = [q for q in questions if q["answer_type"] != "refusal" and q.get("answer_anchor")]
+    skipped = [q for q in questions if q["answer_type"] != "refusal" and not q.get("answer_anchor")]
 
-    for q in questions:
-        if q["answer_type"] == "refusal":
-            continue
-        if not q.get("answer_anchor"):
-            skipped.append(q)
-            continue
-
+    def process(q: dict) -> dict:
         candidates = safe_retrieve(pc, q["question"], max_k, client, num_variations)
         scored = score_question(q["answer_anchor"], candidates, k_values)
-        results.append(
-            {
-                "id": q["id"],
-                "tier": q["tier"],
-                "source_doc": q["source_doc"],
-                "question": q["question"],
-                "found": scored["total_relevant_found"] > 0,
-                "first_hit_rank": scored["first_hit_rank"],
-                "num_candidates": len(candidates),
-                "top1_score": candidates[0]["score"] if candidates else None,
-                "scores": scored["per_k"],
-            }
-        )
+        return {
+            "id": q["id"],
+            "tier": q["tier"],
+            "source_doc": q["source_doc"],
+            "question": q["question"],
+            "found": scored["total_relevant_found"] > 0,
+            "first_hit_rank": scored["first_hit_rank"],
+            "num_candidates": len(candidates),
+            "top1_score": candidates[0]["score"] if candidates else None,
+            "scores": scored["per_k"],
+        }
+
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
+        results = list(pool.map(process, scoreable))
 
     return results, skipped
 
@@ -147,32 +145,29 @@ def run_refusal_diagnostics(
     k_values: tuple[int, ...],
     client: anthropic.Anthropic | None = None,
     num_variations: int = NUM_QUERY_VARIATIONS,
+    max_workers: int = DEFAULT_MAX_WORKERS,
 ) -> list[dict]:
     """Retrieves for refusal-tier questions and records how confident the
     top hits look, without scoring them against any ground-truth chunk."""
     max_k = max(k_values)
-    diagnostics = []
+    refusal_qs = [q for q in questions if q["answer_type"] == "refusal"]
 
-    for q in questions:
-        if q["answer_type"] != "refusal":
-            continue
-
+    def process(q: dict) -> dict:
         candidates = safe_retrieve(pc, q["question"], max_k, client, num_variations)
         scores = [c["score"] for c in candidates]
         top3 = scores[:3]
-        diagnostics.append(
-            {
-                "id": q["id"],
-                "source_doc": q["source_doc"],
-                "question": q["question"],
-                "top1_score": scores[0] if scores else None,
-                "top3_avg_score": sum(top3) / len(top3) if top3 else None,
-                "top1_source_doc": candidates[0]["source"] if candidates else None,
-                "top1_matches_named_doc": (candidates[0]["source"] == q["source_doc"]) if candidates else None,
-            }
-        )
+        return {
+            "id": q["id"],
+            "source_doc": q["source_doc"],
+            "question": q["question"],
+            "top1_score": scores[0] if scores else None,
+            "top3_avg_score": sum(top3) / len(top3) if top3 else None,
+            "top1_source_doc": candidates[0]["source"] if candidates else None,
+            "top1_matches_named_doc": (candidates[0]["source"] == q["source_doc"]) if candidates else None,
+        }
 
-    return diagnostics
+    with ThreadPoolExecutor(max_workers=max_workers) as pool:
+        return list(pool.map(process, refusal_qs))
 
 
 def score_gap_summary(results: list[dict], refusal_diagnostics: list[dict]) -> dict:
@@ -309,6 +304,13 @@ def main() -> None:
         "Adds one Claude call per question and writes to separate '-fusion' report files.",
     )
     parser.add_argument("--num-variations", type=int, default=NUM_QUERY_VARIATIONS)
+    parser.add_argument(
+        "--max-workers",
+        type=int,
+        default=DEFAULT_MAX_WORKERS,
+        help="Questions evaluated concurrently. Each question already fans out internally "
+        "(5x, or ~20x under --rag-fusion), so keep this modest to avoid API rate limits.",
+    )
     args = parser.parse_args()
 
     k_values = tuple(sorted(args.k))
@@ -319,8 +321,10 @@ def main() -> None:
     method_label = "RAG Fusion" if args.rag_fusion else "baseline"
 
     print(f"Evaluating {len(questions)} questions from {args.eval_set} [{method_label}] ...")
-    results, skipped = run_evaluation(questions, pc, k_values, client, args.num_variations)
-    refusal_diagnostics = run_refusal_diagnostics(questions, pc, k_values, client, args.num_variations)
+    results, skipped = run_evaluation(questions, pc, k_values, client, args.num_variations, args.max_workers)
+    refusal_diagnostics = run_refusal_diagnostics(
+        questions, pc, k_values, client, args.num_variations, args.max_workers
+    )
     gap = score_gap_summary(results, refusal_diagnostics)
 
     tier_counts = defaultdict(int)

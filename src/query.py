@@ -9,6 +9,7 @@ Usage (from the project root):
 import argparse
 import os
 import re
+from concurrent.futures import ThreadPoolExecutor
 
 import anthropic
 from dotenv import load_dotenv
@@ -44,26 +45,30 @@ Respond with exactly {n} lines, one query per line, and nothing else (no numberi
 commentary)."""
 
 
+def _search_index(pc: Pinecone, index_name: str, question: str) -> list[dict]:
+    index = pc.Index(index_name)
+    res = index.search(
+        namespace=NAMESPACE,
+        query={"inputs": {"text": question}, "top_k": TOP_K_PER_INDEX},
+    )
+    return [
+        {
+            "score": hit["score_"],
+            "source": hit["fields"]["source"],
+            "page": hit["fields"]["page"],
+            "text": hit["fields"]["chunk_text"],
+        }
+        for hit in res["result"]["hits"]
+    ]
+
+
 def retrieve(pc: Pinecone, question: str, filing: str | None, top_k: int) -> list[dict]:
     index_names = [INDEXES[filing]] if filing else list(INDEXES.values())
 
-    hits = []
-    for index_name in index_names:
-        index = pc.Index(index_name)
-        res = index.search(
-            namespace=NAMESPACE,
-            query={"inputs": {"text": question}, "top_k": TOP_K_PER_INDEX},
-        )
-        for hit in res["result"]["hits"]:
-            hits.append(
-                {
-                    "score": hit["score_"],
-                    "source": hit["fields"]["source"],
-                    "page": hit["fields"]["page"],
-                    "text": hit["fields"]["chunk_text"],
-                }
-            )
+    with ThreadPoolExecutor(max_workers=len(index_names)) as pool:
+        results = pool.map(lambda name: _search_index(pc, name, question), index_names)
 
+    hits = [hit for result in results for hit in result]
     hits.sort(key=lambda h: h["score"], reverse=True)
     return hits[:top_k]
 
@@ -118,7 +123,8 @@ def retrieve_with_fusion(
     queries = [question] + variations
 
     per_query_k = max(FUSION_TOP_K_PER_QUERY, top_k)
-    ranked_lists = [retrieve(pc, q, filing, per_query_k) for q in queries]
+    with ThreadPoolExecutor(max_workers=len(queries)) as pool:
+        ranked_lists = list(pool.map(lambda q: retrieve(pc, q, filing, per_query_k), queries))
     fused = reciprocal_rank_fusion(ranked_lists)
     return fused[:top_k], variations
 
