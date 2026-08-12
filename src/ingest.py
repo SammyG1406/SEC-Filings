@@ -16,8 +16,8 @@ from config import FILINGS, FILINGS_DIR, NAMESPACE
 
 load_dotenv()
 
-MAX_CHARS = 1500
-OVERLAP = 200
+MAX_CHARS = 700
+OVERLAP = 100
 BATCH_SIZE = 90
 
 
@@ -91,6 +91,10 @@ def main() -> None:
         print(f"  {len(records)} chunks extracted")
 
         index = pc.Index(index_name)
+        try:
+            index.delete(delete_all=True, namespace=NAMESPACE)
+        except Exception:
+            pass  # namespace doesn't exist yet on a fresh index
         upsert_in_batches(index, records)
 
         stats = index.describe_index_stats()

@@ -57,7 +57,7 @@ FUSION_TOP_K_PER_QUERY = 10
 RRF_K = 60
 
 # --- Reranking ---
-RERANK_MODEL = "bge-reranker-v2-m3"
+RERANK_MODEL = "pinecone-rerank-v0"
 RERANK_POOL_SIZE = 10  # kept small: a wide cross-filing pool dilutes the reranker's score calibration
 
 QUERY_VARIATION_SYSTEM_PROMPT = """You are a search query generator for a retrieval system over SEC 10-Q filings.
@@ -185,6 +185,7 @@ def rerank(pc: Pinecone, question: str, hits: list[dict], top_n: int) -> list[di
         rank_fields=["text"],
         top_n=min(top_n, len(hits)),
         return_documents=False,
+        parameters={"truncate": "END"},
     )
     reranked = []
     for item in result.data:
@@ -255,9 +256,10 @@ def main() -> None:
         "--rerank",
         dest="rerank",
         action="store_true",
-        default=False,
+        default=True,
         help="Rerank retrieved candidates against the actual question text before answering "
-        "(default: off — regressed computed_comparative and refusal-detection in eval; see eval/reports).",
+        "(default: on). bge-reranker-v2-m3 regressed computed_comparative/refusal-detection in eval "
+        "due to poor score calibration on this domain; pinecone-rerank-v0 fixed it — see eval/reports.",
     )
     parser.add_argument("--no-rerank", dest="rerank", action="store_false", help="Skip reranking.")
     args = parser.parse_args()
