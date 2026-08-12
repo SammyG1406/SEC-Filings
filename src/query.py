@@ -8,6 +8,7 @@ Usage (from the project root):
 
 import argparse
 import os
+import re
 
 import anthropic
 from dotenv import load_dotenv
@@ -27,6 +28,20 @@ INDEXES = {
     "xerian": "xerian-10q",
     "alternus": "alternus-10q",
 }
+
+# --- RAG Fusion (query translation) ---
+NUM_QUERY_VARIATIONS = 3
+FUSION_TOP_K_PER_QUERY = 10
+RRF_K = 60
+
+QUERY_VARIATION_SYSTEM_PROMPT = """You are a search query generator for a retrieval system over SEC 10-Q filings.
+Given a user's question, write {n} alternative search queries that could each surface the relevant \
+passage, by varying phrasing, terminology (e.g. "net loss" vs "net income (loss)"), and specificity. \
+Keep each query self-contained and focused on the same underlying information need - do not invent \
+new facts or change what is being asked.
+
+Respond with exactly {n} lines, one query per line, and nothing else (no numbering, bullets, or \
+commentary)."""
 
 
 def retrieve(pc: Pinecone, question: str, filing: str | None, top_k: int) -> list[dict]:
@@ -51,6 +66,61 @@ def retrieve(pc: Pinecone, question: str, filing: str | None, top_k: int) -> lis
 
     hits.sort(key=lambda h: h["score"], reverse=True)
     return hits[:top_k]
+
+
+def generate_query_variations(
+    client: anthropic.Anthropic, question: str, n: int = NUM_QUERY_VARIATIONS
+) -> list[str]:
+    """Query translation step: asks Claude to rephrase the question into `n`
+    alternative search queries covering the same information need."""
+    message = client.messages.create(
+        model=MODEL,
+        max_tokens=300,
+        system=QUERY_VARIATION_SYSTEM_PROMPT.format(n=n),
+        messages=[{"role": "user", "content": question}],
+    )
+    text = "".join(block.text for block in message.content if block.type == "text")
+    lines = [re.sub(r"^[\-\d.)\s]+", "", line).strip() for line in text.splitlines()]
+    return [line for line in lines if line][:n]
+
+
+def reciprocal_rank_fusion(ranked_lists: list[list[dict]], k: int = RRF_K) -> list[dict]:
+    """Combines several ranked hit lists into one via Reciprocal Rank Fusion:
+    score(chunk) = sum over lists of 1 / (k + rank_in_list). Chunks are
+    deduped on (source, page, text) since Pinecone hits don't carry the
+    original record id back through `retrieve`."""
+    scores: dict[tuple, float] = {}
+    best_hit: dict[tuple, dict] = {}
+
+    for hits in ranked_lists:
+        for rank, hit in enumerate(hits, start=1):
+            key = (hit["source"], hit["page"], hit["text"])
+            scores[key] = scores.get(key, 0.0) + 1.0 / (k + rank)
+            if key not in best_hit or hit["score"] > best_hit[key]["score"]:
+                best_hit[key] = hit
+
+    fused = [{**best_hit[key], "rrf_score": score} for key, score in scores.items()]
+    fused.sort(key=lambda h: h["rrf_score"], reverse=True)
+    return fused
+
+
+def retrieve_with_fusion(
+    pc: Pinecone,
+    client: anthropic.Anthropic,
+    question: str,
+    filing: str | None,
+    top_k: int,
+    num_variations: int = NUM_QUERY_VARIATIONS,
+) -> tuple[list[dict], list[str]]:
+    """RAG Fusion: translates the question into several query variations,
+    retrieves for each independently, and fuses the ranked results with RRF."""
+    variations = generate_query_variations(client, question, num_variations)
+    queries = [question] + variations
+
+    per_query_k = max(FUSION_TOP_K_PER_QUERY, top_k)
+    ranked_lists = [retrieve(pc, q, filing, per_query_k) for q in queries]
+    fused = reciprocal_rank_fusion(ranked_lists)
+    return fused[:top_k], variations
 
 
 def build_context(hits: list[dict]) -> str:
@@ -87,12 +157,34 @@ def main() -> None:
     parser.add_argument("question")
     parser.add_argument("--filing", choices=list(INDEXES), default=None)
     parser.add_argument("--top-k", type=int, default=6)
+    parser.add_argument(
+        "--rag-fusion",
+        dest="rag_fusion",
+        action="store_true",
+        default=True,
+        help="Translate the question into multiple query variations and fuse retrieval "
+        "across them with RRF (default: on).",
+    )
+    parser.add_argument(
+        "--no-rag-fusion", dest="rag_fusion", action="store_false", help="Use plain single-query retrieval."
+    )
+    parser.add_argument("--num-variations", type=int, default=NUM_QUERY_VARIATIONS)
     args = parser.parse_args()
 
     pc = Pinecone(api_key=os.environ["PINECONE_API_KEY"])
     client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
-    hits = retrieve(pc, args.question, args.filing, args.top_k)
+    if args.rag_fusion:
+        hits, variations = retrieve_with_fusion(
+            pc, client, args.question, args.filing, args.top_k, args.num_variations
+        )
+        print("Query variations:")
+        for v in variations:
+            print(f"  - {v}")
+        print()
+    else:
+        hits = retrieve(pc, args.question, args.filing, args.top_k)
+
     if not hits:
         print("No relevant chunks found.")
         return
