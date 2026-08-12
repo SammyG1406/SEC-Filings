@@ -44,9 +44,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
+import anthropic  # noqa: E402
 from dotenv import load_dotenv  # noqa: E402
 from pinecone import Pinecone  # noqa: E402
-from query import retrieve  # noqa: E402  (reuses the app's own cross-index search)
+from query import NUM_QUERY_VARIATIONS, retrieve, retrieve_with_fusion  # noqa: E402  (reuses the app's own retrieval)
 
 load_dotenv()
 
@@ -86,15 +87,30 @@ def score_question(anchor: str, candidates: list[dict], k_values: tuple[int, ...
     return {"total_relevant_found": total_relevant, "first_hit_rank": first_hit_rank, "per_k": per_k}
 
 
-def safe_retrieve(pc: Pinecone, question: str, top_k: int) -> list[dict]:
+def safe_retrieve(
+    pc: Pinecone,
+    question: str,
+    top_k: int,
+    client: anthropic.Anthropic | None = None,
+    num_variations: int = NUM_QUERY_VARIATIONS,
+) -> list[dict]:
     try:
+        if client is not None:
+            hits, _variations = retrieve_with_fusion(pc, client, question, None, top_k, num_variations)
+            return hits
         return retrieve(pc, question, filing=None, top_k=top_k)
     except Exception as exc:  # keep the run going even if one query fails
         print(f"  ! retrieval failed for {question!r}: {exc}", file=sys.stderr)
         return []
 
 
-def run_evaluation(questions: list[dict], pc: Pinecone, k_values: tuple[int, ...]) -> tuple[list[dict], list[dict]]:
+def run_evaluation(
+    questions: list[dict],
+    pc: Pinecone,
+    k_values: tuple[int, ...],
+    client: anthropic.Anthropic | None = None,
+    num_variations: int = NUM_QUERY_VARIATIONS,
+) -> tuple[list[dict], list[dict]]:
     max_k = max(k_values)
     results = []
     skipped = []  # answerable in principle but missing an anchor to score against
@@ -106,7 +122,7 @@ def run_evaluation(questions: list[dict], pc: Pinecone, k_values: tuple[int, ...
             skipped.append(q)
             continue
 
-        candidates = safe_retrieve(pc, q["question"], max_k)
+        candidates = safe_retrieve(pc, q["question"], max_k, client, num_variations)
         scored = score_question(q["answer_anchor"], candidates, k_values)
         results.append(
             {
@@ -125,7 +141,13 @@ def run_evaluation(questions: list[dict], pc: Pinecone, k_values: tuple[int, ...
     return results, skipped
 
 
-def run_refusal_diagnostics(questions: list[dict], pc: Pinecone, k_values: tuple[int, ...]) -> list[dict]:
+def run_refusal_diagnostics(
+    questions: list[dict],
+    pc: Pinecone,
+    k_values: tuple[int, ...],
+    client: anthropic.Anthropic | None = None,
+    num_variations: int = NUM_QUERY_VARIATIONS,
+) -> list[dict]:
     """Retrieves for refusal-tier questions and records how confident the
     top hits look, without scoring them against any ground-truth chunk."""
     max_k = max(k_values)
@@ -135,7 +157,7 @@ def run_refusal_diagnostics(questions: list[dict], pc: Pinecone, k_values: tuple
         if q["answer_type"] != "refusal":
             continue
 
-        candidates = safe_retrieve(pc, q["question"], max_k)
+        candidates = safe_retrieve(pc, q["question"], max_k, client, num_variations)
         scores = [c["score"] for c in candidates]
         top3 = scores[:3]
         diagnostics.append(
@@ -208,11 +230,12 @@ def build_markdown_report(
     tier_counts: dict[str, int],
     k_values: tuple[int, ...],
     timestamp: str,
+    method_label: str,
 ) -> str:
     misses = [r for r in results if not r["found"]]
 
     lines = [
-        f"# Retrieval evaluation report — {timestamp}",
+        f"# Retrieval evaluation report — {method_label} — {timestamp}",
         "",
         f"Evaluated {len(results)} answerable questions ({', '.join(f'{count} {tier}' for tier, count in tier_counts.items())}) "
         f"against Recall/Precision/MRR/NDCG, plus {len(refusal_diagnostics)} refusal-tier questions run through "
@@ -279,16 +302,25 @@ def main() -> None:
     parser.add_argument("--eval-set", type=Path, default=DEFAULT_EVAL_SET)
     parser.add_argument("--k", type=int, nargs="+", default=list(DEFAULT_K_VALUES))
     parser.add_argument("--output-dir", type=Path, default=REPORTS_DIR)
+    parser.add_argument(
+        "--rag-fusion",
+        action="store_true",
+        help="Evaluate RAG Fusion (query translation + RRF) instead of baseline single-query retrieval. "
+        "Adds one Claude call per question and writes to separate '-fusion' report files.",
+    )
+    parser.add_argument("--num-variations", type=int, default=NUM_QUERY_VARIATIONS)
     args = parser.parse_args()
 
     k_values = tuple(sorted(args.k))
     questions = json.loads(args.eval_set.read_text(encoding="utf-8"))
 
     pc = Pinecone(api_key=os.environ["PINECONE_API_KEY"])
+    client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"]) if args.rag_fusion else None
+    method_label = "RAG Fusion" if args.rag_fusion else "baseline"
 
-    print(f"Evaluating {len(questions)} questions from {args.eval_set} ...")
-    results, skipped = run_evaluation(questions, pc, k_values)
-    refusal_diagnostics = run_refusal_diagnostics(questions, pc, k_values)
+    print(f"Evaluating {len(questions)} questions from {args.eval_set} [{method_label}] ...")
+    results, skipped = run_evaluation(questions, pc, k_values, client, args.num_variations)
+    refusal_diagnostics = run_refusal_diagnostics(questions, pc, k_values, client, args.num_variations)
     gap = score_gap_summary(results, refusal_diagnostics)
 
     tier_counts = defaultdict(int)
@@ -329,6 +361,8 @@ def main() -> None:
 
     report_json = {
         "timestamp": timestamp,
+        "method": "rag_fusion" if args.rag_fusion else "baseline",
+        "num_variations": args.num_variations if args.rag_fusion else None,
         "eval_set": str(args.eval_set),
         "k_values": list(k_values),
         "overall": overall,
@@ -340,15 +374,16 @@ def main() -> None:
         "score_gap_summary": gap,
     }
     markdown = build_markdown_report(
-        results, skipped, refusal_diagnostics, gap, overall, by_tier, dict(tier_counts), k_values, timestamp
+        results, skipped, refusal_diagnostics, gap, overall, by_tier, dict(tier_counts), k_values, timestamp, method_label
     )
 
-    for stem in (timestamp, "latest"):
+    suffix = "-fusion" if args.rag_fusion else ""
+    for stem in (f"{timestamp}{suffix}", f"latest{suffix}"):
         (args.output_dir / f"{stem}.json").write_text(json.dumps(report_json, indent=2), encoding="utf-8")
         (args.output_dir / f"{stem}.md").write_text(markdown, encoding="utf-8")
 
     print()
-    print(f"Report saved to {args.output_dir / f'{timestamp}.md'} (and latest.md / latest.json)")
+    print(f"Report saved to {args.output_dir / f'{timestamp}{suffix}.md'} (and latest{suffix}.md / latest{suffix}.json)")
 
 
 if __name__ == "__main__":
