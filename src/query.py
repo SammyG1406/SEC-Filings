@@ -37,7 +37,7 @@ RRF_K = 60
 
 # --- Reranking ---
 RERANK_MODEL = "bge-reranker-v2-m3"
-RERANK_POOL_SIZE = 20
+RERANK_POOL_SIZE = 10  # kept small: a wide cross-filing pool dilutes the reranker's score calibration
 
 QUERY_VARIATION_SYSTEM_PROMPT = """You are a search query generator for a retrieval system over SEC 10-Q filings.
 Given a user's question, write {n} alternative search queries that could each surface the relevant \
