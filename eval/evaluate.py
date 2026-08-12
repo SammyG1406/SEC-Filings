@@ -54,6 +54,7 @@ from query import (  # noqa: E402  (reuses the app's own retrieval)
     rerank,
     retrieve,
     retrieve_with_fusion,
+    route_filing,
 )
 
 load_dotenv()
@@ -101,14 +102,17 @@ def safe_retrieve(
     top_k: int,
     client: anthropic.Anthropic | None = None,
     num_variations: int = NUM_QUERY_VARIATIONS,
+    use_fusion: bool = False,
     use_rerank: bool = False,
+    use_route: bool = False,
 ) -> list[dict]:
     try:
+        filing = route_filing(client, question) if use_route else None
         pool_k = max(RERANK_POOL_SIZE, top_k) if use_rerank else top_k
-        if client is not None:
-            hits, _variations = retrieve_with_fusion(pc, client, question, None, pool_k, num_variations)
+        if use_fusion:
+            hits, _variations = retrieve_with_fusion(pc, client, question, filing, pool_k, num_variations)
         else:
-            hits = retrieve(pc, question, filing=None, top_k=pool_k)
+            hits = retrieve(pc, question, filing=filing, top_k=pool_k)
         return rerank(pc, question, hits, top_k) if use_rerank else hits
     except Exception as exc:  # keep the run going even if one query fails
         print(f"  ! retrieval failed for {question!r}: {exc}", file=sys.stderr)
@@ -130,14 +134,16 @@ def run_evaluation(
     client: anthropic.Anthropic | None = None,
     num_variations: int = NUM_QUERY_VARIATIONS,
     max_workers: int = DEFAULT_MAX_WORKERS,
+    use_fusion: bool = False,
     use_rerank: bool = False,
+    use_route: bool = False,
 ) -> tuple[list[dict], list[dict]]:
     max_k = max(k_values)
     scoreable = [q for q in questions if q["answer_type"] != "refusal" and q.get("answer_anchor")]
     skipped = [q for q in questions if q["answer_type"] != "refusal" and not q.get("answer_anchor")]
 
     def process(q: dict) -> dict:
-        candidates = safe_retrieve(pc, q["question"], max_k, client, num_variations, use_rerank)
+        candidates = safe_retrieve(pc, q["question"], max_k, client, num_variations, use_fusion, use_rerank, use_route)
         scored = score_question(q["answer_anchor"], candidates, k_values)
         return {
             "id": q["id"],
@@ -164,7 +170,9 @@ def run_refusal_diagnostics(
     client: anthropic.Anthropic | None = None,
     num_variations: int = NUM_QUERY_VARIATIONS,
     max_workers: int = DEFAULT_MAX_WORKERS,
+    use_fusion: bool = False,
     use_rerank: bool = False,
+    use_route: bool = False,
 ) -> list[dict]:
     """Retrieves for refusal-tier questions and records how confident the
     top hits look, without scoring them against any ground-truth chunk."""
@@ -172,7 +180,7 @@ def run_refusal_diagnostics(
     refusal_qs = [q for q in questions if q["answer_type"] == "refusal"]
 
     def process(q: dict) -> dict:
-        candidates = safe_retrieve(pc, q["question"], max_k, client, num_variations, use_rerank)
+        candidates = safe_retrieve(pc, q["question"], max_k, client, num_variations, use_fusion, use_rerank, use_route)
         scores = [c.get("rerank_score", c.get("score")) for c in candidates]
         top3 = scores[:3]
         return {
@@ -324,6 +332,13 @@ def main() -> None:
     )
     parser.add_argument("--num-variations", type=int, default=NUM_QUERY_VARIATIONS)
     parser.add_argument(
+        "--route",
+        action="store_true",
+        help="Logical routing: extract the named company from the question and restrict retrieval "
+        "to its filing (no-op for questions that don't name a single company). "
+        "Writes to separate '-routed' report files.",
+    )
+    parser.add_argument(
         "--rerank",
         action="store_true",
         help="Rerank retrieved candidates against the actual question text before scoring. "
@@ -343,15 +358,20 @@ def main() -> None:
     questions = json.loads(args.eval_set.read_text(encoding="utf-8"))
 
     pc = Pinecone(api_key=os.environ["PINECONE_API_KEY"])
-    client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"]) if args.rag_fusion else None
-    method_label = ("RAG Fusion" if args.rag_fusion else "baseline") + (" + rerank" if args.rerank else "")
+    needs_client = args.rag_fusion or args.route
+    client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"]) if needs_client else None
+    method_label = (
+        ("RAG Fusion" if args.rag_fusion else "baseline")
+        + (" + routing" if args.route else "")
+        + (" + rerank" if args.rerank else "")
+    )
 
     print(f"Evaluating {len(questions)} questions from {args.eval_set} [{method_label}] ...")
     results, skipped = run_evaluation(
-        questions, pc, k_values, client, args.num_variations, args.max_workers, args.rerank
+        questions, pc, k_values, client, args.num_variations, args.max_workers, args.rag_fusion, args.rerank, args.route
     )
     refusal_diagnostics = run_refusal_diagnostics(
-        questions, pc, k_values, client, args.num_variations, args.max_workers, args.rerank
+        questions, pc, k_values, client, args.num_variations, args.max_workers, args.rag_fusion, args.rerank, args.route
     )
     gap = score_gap_summary(results, refusal_diagnostics)
 
@@ -395,6 +415,7 @@ def main() -> None:
         "timestamp": timestamp,
         "method": "rag_fusion" if args.rag_fusion else "baseline",
         "num_variations": args.num_variations if args.rag_fusion else None,
+        "routed": args.route,
         "reranked": args.rerank,
         "eval_set": str(args.eval_set),
         "k_values": list(k_values),
@@ -410,7 +431,7 @@ def main() -> None:
         results, skipped, refusal_diagnostics, gap, overall, by_tier, dict(tier_counts), k_values, timestamp, method_label
     )
 
-    suffix = ("-fusion" if args.rag_fusion else "") + ("-rerank" if args.rerank else "")
+    suffix = ("-fusion" if args.rag_fusion else "") + ("-routed" if args.route else "") + ("-rerank" if args.rerank else "")
     for stem in (f"{timestamp}{suffix}", f"latest{suffix}"):
         (args.output_dir / f"{stem}.json").write_text(json.dumps(report_json, indent=2), encoding="utf-8")
         (args.output_dir / f"{stem}.md").write_text(markdown, encoding="utf-8")
