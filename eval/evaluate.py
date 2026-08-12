@@ -48,7 +48,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 import anthropic  # noqa: E402
 from dotenv import load_dotenv  # noqa: E402
 from pinecone import Pinecone  # noqa: E402
-from query import NUM_QUERY_VARIATIONS, retrieve, retrieve_with_fusion  # noqa: E402  (reuses the app's own retrieval)
+from query import (  # noqa: E402  (reuses the app's own retrieval)
+    NUM_QUERY_VARIATIONS,
+    RERANK_POOL_SIZE,
+    rerank,
+    retrieve,
+    retrieve_with_fusion,
+)
 
 load_dotenv()
 
@@ -95,15 +101,26 @@ def safe_retrieve(
     top_k: int,
     client: anthropic.Anthropic | None = None,
     num_variations: int = NUM_QUERY_VARIATIONS,
+    use_rerank: bool = False,
 ) -> list[dict]:
     try:
+        pool_k = max(RERANK_POOL_SIZE, top_k) if use_rerank else top_k
         if client is not None:
-            hits, _variations = retrieve_with_fusion(pc, client, question, None, top_k, num_variations)
-            return hits
-        return retrieve(pc, question, filing=None, top_k=top_k)
+            hits, _variations = retrieve_with_fusion(pc, client, question, None, pool_k, num_variations)
+        else:
+            hits = retrieve(pc, question, filing=None, top_k=pool_k)
+        return rerank(pc, question, hits, top_k) if use_rerank else hits
     except Exception as exc:  # keep the run going even if one query fails
         print(f"  ! retrieval failed for {question!r}: {exc}", file=sys.stderr)
         return []
+
+
+def top1_score(candidates: list[dict]) -> float | None:
+    """Prefers the rerank score (the actually-used relevance signal when
+    reranking is on) over the raw embedding-similarity score."""
+    if not candidates:
+        return None
+    return candidates[0].get("rerank_score", candidates[0].get("score"))
 
 
 def run_evaluation(
@@ -113,13 +130,14 @@ def run_evaluation(
     client: anthropic.Anthropic | None = None,
     num_variations: int = NUM_QUERY_VARIATIONS,
     max_workers: int = DEFAULT_MAX_WORKERS,
+    use_rerank: bool = False,
 ) -> tuple[list[dict], list[dict]]:
     max_k = max(k_values)
     scoreable = [q for q in questions if q["answer_type"] != "refusal" and q.get("answer_anchor")]
     skipped = [q for q in questions if q["answer_type"] != "refusal" and not q.get("answer_anchor")]
 
     def process(q: dict) -> dict:
-        candidates = safe_retrieve(pc, q["question"], max_k, client, num_variations)
+        candidates = safe_retrieve(pc, q["question"], max_k, client, num_variations, use_rerank)
         scored = score_question(q["answer_anchor"], candidates, k_values)
         return {
             "id": q["id"],
@@ -129,7 +147,7 @@ def run_evaluation(
             "found": scored["total_relevant_found"] > 0,
             "first_hit_rank": scored["first_hit_rank"],
             "num_candidates": len(candidates),
-            "top1_score": candidates[0]["score"] if candidates else None,
+            "top1_score": top1_score(candidates),
             "scores": scored["per_k"],
         }
 
@@ -146,6 +164,7 @@ def run_refusal_diagnostics(
     client: anthropic.Anthropic | None = None,
     num_variations: int = NUM_QUERY_VARIATIONS,
     max_workers: int = DEFAULT_MAX_WORKERS,
+    use_rerank: bool = False,
 ) -> list[dict]:
     """Retrieves for refusal-tier questions and records how confident the
     top hits look, without scoring them against any ground-truth chunk."""
@@ -153,8 +172,8 @@ def run_refusal_diagnostics(
     refusal_qs = [q for q in questions if q["answer_type"] == "refusal"]
 
     def process(q: dict) -> dict:
-        candidates = safe_retrieve(pc, q["question"], max_k, client, num_variations)
-        scores = [c["score"] for c in candidates]
+        candidates = safe_retrieve(pc, q["question"], max_k, client, num_variations, use_rerank)
+        scores = [c.get("rerank_score", c.get("score")) for c in candidates]
         top3 = scores[:3]
         return {
             "id": q["id"],
@@ -305,6 +324,13 @@ def main() -> None:
     )
     parser.add_argument("--num-variations", type=int, default=NUM_QUERY_VARIATIONS)
     parser.add_argument(
+        "--rerank",
+        action="store_true",
+        help="Rerank retrieved candidates against the actual question text before scoring. "
+        "Widens the candidate pool to RERANK_POOL_SIZE first, then reranks down to k. "
+        "Writes to separate '-rerank' report files.",
+    )
+    parser.add_argument(
         "--max-workers",
         type=int,
         default=DEFAULT_MAX_WORKERS,
@@ -318,12 +344,14 @@ def main() -> None:
 
     pc = Pinecone(api_key=os.environ["PINECONE_API_KEY"])
     client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"]) if args.rag_fusion else None
-    method_label = "RAG Fusion" if args.rag_fusion else "baseline"
+    method_label = ("RAG Fusion" if args.rag_fusion else "baseline") + (" + rerank" if args.rerank else "")
 
     print(f"Evaluating {len(questions)} questions from {args.eval_set} [{method_label}] ...")
-    results, skipped = run_evaluation(questions, pc, k_values, client, args.num_variations, args.max_workers)
+    results, skipped = run_evaluation(
+        questions, pc, k_values, client, args.num_variations, args.max_workers, args.rerank
+    )
     refusal_diagnostics = run_refusal_diagnostics(
-        questions, pc, k_values, client, args.num_variations, args.max_workers
+        questions, pc, k_values, client, args.num_variations, args.max_workers, args.rerank
     )
     gap = score_gap_summary(results, refusal_diagnostics)
 
@@ -367,6 +395,7 @@ def main() -> None:
         "timestamp": timestamp,
         "method": "rag_fusion" if args.rag_fusion else "baseline",
         "num_variations": args.num_variations if args.rag_fusion else None,
+        "reranked": args.rerank,
         "eval_set": str(args.eval_set),
         "k_values": list(k_values),
         "overall": overall,
@@ -381,7 +410,7 @@ def main() -> None:
         results, skipped, refusal_diagnostics, gap, overall, by_tier, dict(tier_counts), k_values, timestamp, method_label
     )
 
-    suffix = "-fusion" if args.rag_fusion else ""
+    suffix = ("-fusion" if args.rag_fusion else "") + ("-rerank" if args.rerank else "")
     for stem in (f"{timestamp}{suffix}", f"latest{suffix}"):
         (args.output_dir / f"{stem}.json").write_text(json.dumps(report_json, indent=2), encoding="utf-8")
         (args.output_dir / f"{stem}.md").write_text(markdown, encoding="utf-8")
