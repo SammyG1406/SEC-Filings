@@ -35,6 +35,10 @@ NUM_QUERY_VARIATIONS = 3
 FUSION_TOP_K_PER_QUERY = 10
 RRF_K = 60
 
+# --- Reranking ---
+RERANK_MODEL = "bge-reranker-v2-m3"
+RERANK_POOL_SIZE = 20
+
 QUERY_VARIATION_SYSTEM_PROMPT = """You are a search query generator for a retrieval system over SEC 10-Q filings.
 Given a user's question, write {n} alternative search queries that could each surface the relevant \
 passage, by varying phrasing, terminology (e.g. "net loss" vs "net income (loss)"), and specificity. \
@@ -129,6 +133,28 @@ def retrieve_with_fusion(
     return fused[:top_k], variations
 
 
+def rerank(pc: Pinecone, question: str, hits: list[dict], top_n: int) -> list[dict]:
+    """Reads each candidate's actual text against the actual question (a joint,
+    cross-attention read, unlike the independently-computed embeddings behind
+    `retrieve`) and reorders by true relevance rather than rank consensus."""
+    if not hits:
+        return hits
+    result = pc.inference.rerank(
+        model=RERANK_MODEL,
+        query=question,
+        documents=[{"text": h["text"]} for h in hits],
+        rank_fields=["text"],
+        top_n=min(top_n, len(hits)),
+        return_documents=False,
+    )
+    reranked = []
+    for item in result.data:
+        hit = dict(hits[item.index])
+        hit["rerank_score"] = item.score
+        reranked.append(hit)
+    return reranked
+
+
 def build_context(hits: list[dict]) -> str:
     blocks = []
     for i, hit in enumerate(hits, start=1):
@@ -175,21 +201,32 @@ def main() -> None:
         "--no-rag-fusion", dest="rag_fusion", action="store_false", help="Use plain single-query retrieval."
     )
     parser.add_argument("--num-variations", type=int, default=NUM_QUERY_VARIATIONS)
+    parser.add_argument(
+        "--rerank",
+        dest="rerank",
+        action="store_true",
+        default=True,
+        help="Rerank retrieved candidates against the actual question text before answering (default: on).",
+    )
+    parser.add_argument("--no-rerank", dest="rerank", action="store_false", help="Skip reranking.")
     args = parser.parse_args()
 
     pc = Pinecone(api_key=os.environ["PINECONE_API_KEY"])
     client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
+    pool_k = RERANK_POOL_SIZE if args.rerank else args.top_k
+
     if args.rag_fusion:
-        hits, variations = retrieve_with_fusion(
-            pc, client, args.question, args.filing, args.top_k, args.num_variations
-        )
+        hits, variations = retrieve_with_fusion(pc, client, args.question, args.filing, pool_k, args.num_variations)
         print("Query variations:")
         for v in variations:
             print(f"  - {v}")
         print()
     else:
-        hits = retrieve(pc, args.question, args.filing, args.top_k)
+        hits = retrieve(pc, args.question, args.filing, pool_k)
+
+    if args.rerank:
+        hits = rerank(pc, args.question, hits, args.top_k)
 
     if not hits:
         print("No relevant chunks found.")
